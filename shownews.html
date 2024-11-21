@@ -1,0 +1,210 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <link href="https://image.makewebeasy.net/makeweb/0/pMrtkmxgt/APNG_images/bot_02.png?v=202012190947" rel="shortcut icon">
+<title>N E W S ข่าวสาร</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.css"  rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://bit.ly/fontiton5" type="text/css" charset="utf-8" />
+    <style type="text/css">
+        body {
+            font-family: 'line_seed_sans_th';
+        }
+    </style>
+
+</head>
+
+<body>
+
+<section class="bg-center bg-no-repeat bg-[url('https://flowbite.s3.amazonaws.com/docs/jumbotron/conference.jpg')] bg-red-400 bg-blend-multiply">
+  <div class="px-4 mx-auto max-w-screen-xl text-center py-1">
+    <br>
+    <center><img class="w-10 h-10 rounded-full text-center" id="profileurl" src="https://image.makewebeasy.net/makeweb/0/pMrtkmxgt/APNG_images/bot_02.png?v=202012190947" alt="Rounded avatar" hidden></center>
+      <h1 class="mb-4 text-3xl font-extrabold tracking-tight leading-none text-white md:text-3xl lg:text-3xl">N E W S</h1>
+      <p class="mb-8 text-lg font-normal text-gray-300 lg:text-xl sm:px-16 lg:px-48" id="displaynamefield" hidden></p>
+    <p class="mb-8 text-lg font-normal text-white lg:text-xl sm:px-16 lg:px-48">ข่าว สาร สำ คัญ</p>
+  </div>
+</section>
+
+<div id="HOFProject">
+
+</div>
+
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            getData();
+             $.getScript("./liffscript.js", function() {
+           // getData();
+          initializeLiff("1657007036-Zq0bMMbG");
+
+
+          })
+
+        });
+    </script>
+
+  <script>
+
+
+const getData = () => {
+  fetch('https://opensheet.elk.sh/1BxO_XwLbK_MTcT801Pf_gj2jKXScERyoK0fetKHzT70/Import1')
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      data.forEach((d, additems) => {
+        let dataHTML = '';
+        additems++;
+
+        dataHTML += `
+        <div class="max-w-sm mx-auto bg-white p-5 rounded shadow-lg">
+
+        <div class="bg-red-400 text-white p-2 rounded mb-5 text-xs"><center>
+    <h5 class="text-lg font-semibold mb-2">${d.Title}</h5></center>
+  </div>
+
+  <a href="${d.List}"><img src="${d.Image_Url}" class="w-full rounded mb-4" alt="Image"></a>
+  <p class="text-gray-600 font-semibold">💛 : <mark class="px-2 font-normal text-sm bg-white dark:bg-blue-500">${d.Content}</mark></p>
+
+  <br>
+  &nbsp; &nbsp; &nbsp; &nbsp;
+
+  <a href="#" onclick="searchflex('${d.Image_Url}' ,'${d.Title}' , '${d.List}' )">
+  <button class="bg-red-500 text-white text-lg font-semibold px-4 py-2 rounded">- S h a r e -</button></a>
+  </div>
+ </div></br>
+          `;
+
+        document.getElementById('HOFProject').innerHTML += dataHTML;
+      });
+    });
+};
+
+
+function searchflex(Image_Url , Title , List)
+      {
+  liff.shareTargetPicker(
+    [
+{
+    "type": "flex",
+    "altText": "N e w s",
+    "contents":
+    {
+    "type": "bubble",
+    "hero": {
+      "type": "image",
+      "url": Image_Url,
+      "size": "full",
+      "aspectRatio": "20:13",
+      "aspectMode": "cover",
+      "action": {
+        "type": "uri",
+        "label": "ดูข่าว",
+        "uri": List
+      }
+    },
+    "body": {
+      "type": "box",
+      "layout": "vertical",
+      "spacing": "md",
+      "contents": [
+        {
+          "type": "text",
+          "text":  Title,
+          "size": "lg",
+          "weight": "bold",
+          "wrap": true
+        },
+        {
+          "type": "box",
+          "layout": "vertical",
+          "spacing": "sm",
+          "contents": [
+            {
+              "type": "box",
+              "layout": "baseline",
+              "contents": [
+                {
+                  "type": "text",
+                  "text": "👆 คลิก ดูรายละเอียด",
+                  "margin": "sm",
+                  "flex": 0,
+                  "wrap": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "action": {
+        "type": "uri",
+        "label": "ดูข่าว",
+        "uri": List
+      }
+    },
+    "footer": {
+      "type": "box",
+      "layout": "vertical",
+      "contents": [
+        {
+          "type": "box",
+          "layout": "vertical",
+          "contents": [
+            {
+              "type": "button",
+              "style": "primary",
+              "color": "#905c44",
+              "margin": "none",
+              "action": {
+                "type": "uri",
+                "label": "ติดตามเพื่อรับข่าวสาร",
+                "uri": "https://line.me/ti/p/~krisdakorn_kornsilpa"
+              },
+              "height": "sm"
+            }
+          ],
+          "cornerRadius": "xxl",
+          "paddingAll": "none"
+        }
+      ],
+      "paddingStart": "lg",
+      "paddingEnd": "lg",
+      "paddingTop": "sm"
+    }
+  }
+
+}
+
+    ]
+  )
+  .then(function (res) {
+    if (res) {
+
+      Swal.fire({
+        position: 'top-center',
+        icon: 'success',
+        title: 'สั่งซื้อ เรียบ ร้อย',
+        showConfirmButton: false,
+        timer: 1500
+      }).then(() => {
+        liff.closeWindow();
+      })     // หากไม่ต้องการให้ปิด liff ให้เอา ตั้งแต่บรรทัด390 .then.... liff.close ออก ดูวงเล็บ และปีกกา ให้ครบ ถึงบรรทัดนี้
+    } else {
+      // sending message canceled
+      console.log("TargetPicker was closed!");
+    }
+  })
+  .catch(function (error) {
+    // something went wrong before sending a message
+    console.log("something wrong happen");
+  });
+
+}
+</script>
+</body>
+</html>

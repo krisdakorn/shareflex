@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://bit.ly/fontiton5" type="text/css" charset="utf-8" />
+  <style type="text/css"> body { font-family: 'line_seed_sans_th'; } </style>
+  <meta name="description" content="LINE Login">
+  <meta name="keywords" content="flex Message">
+  <meta name="author" content="HOF Krisda">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.12.6/dist/sweetalert2.all.min.js"></script>
+
+<title> Loading....</title>
+  <style>
+    .centerScreen {
+      margin-top: 20;
+      margin-right: auto;
+      margin-bottom: 20;
+      margin-left: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="centerScreen">
+    <center>
+      <img src="https://media.giphy.com/media/LjGYFXjfRecLqqMkDQ/giphy.gif" height="300px" , width="300px" />
+      <h1>
+        กรุณารอซักครู่...<br>
+        กำลังเข้าสู่หน้าหลัก
+      </h1>
+
+    </center>
+  </div>
+</body>
+<!-- script ที่ทำให้ใช้งาน Liff ได้ // ต้องใส่ก่อน------------->
+ <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script>
+    //ใส่ LIFF ID ไอดีของเรา
+    const liffId = "1657007036-Zq0bMMbG";
+<!-- คำสั่งบังคับใช้งานครั้งแรก ให้ Login ------------->
+    liff.ready
+      .then(() => {
+        if (liff.isLoggedIn()) {
+          return liff.getProfile();
+        } else {
+          liff.login();
+        }
+      })
+      .then((profile) => {
+      Swal.fire({
+    position: 'center',
+    icon: 'success',
+    title: 'ดำเนินการเรียบร้อย',
+    text: 'กำลังเข้าสู่ระบบ',
+    showConfirmButton: false,
+    timer: 700,
+         onClose: () => {
+           //ใส่เว็บไซต์ที่เราต้องการให้ไปต่อ
+        window.location.replace(
+          `https://www.hofkrisda.com/SHproject/new/shownews.html`
+        );
+            }
+  });
+
+  var options = {weekday:'long', year:'numeric', month:'long', day:'numeric'}
+ var a = new Date();
+ var date = a.toLocaleDateString(undefined, options);
+
+liff.sendMessages([
+  {
+    "type": "sticker",
+    "packageId": "11539",
+    "stickerId": "52114146"
+  }
+])
+
+      });
+    liff.init(
+      {
+        liffId: liffId,
+      },
+      () => {},
+      (err) => {
+        window.alert(err);
+      }
+    );
+  </script>
+
+</html>
