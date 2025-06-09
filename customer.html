@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Rewards - สะสมแต้มอาหาร</title>
+    <meta name="description" content="Food Rewards" />
+    <meta name="author" content="Hofkrisda" />
+    <meta property="og:title" content="Food Rewards-iton5-thailand" />
+    <meta property="og:description" content="Food Rewards" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://image.makewebcdn.com/makeweb/0/pMrtkmxgt/1_pngstk/golf4.png?v=202405291424" />
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://bit.ly/fontiton5" type="text/css" charset="utf-8" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --dark-gray: #4c5454;
+            --coral: #ff715b;
+            --white: #ffffff;
+            --teal: #0e9483;
+            --brown: #523f38;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'line_seed_sans_th';
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: var(--dark-gray);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0;
+            background-color: var(--white);
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background-color: var(--teal);
+            color: var(--white);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .profile-section {
+            padding: 20px;
+            background-color: var(--white);
+            border-radius: 15px;
+            margin: -40px 20px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+
+
+
+        .profile-details h2 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .profile-details p {
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .points-display {
+            background: linear-gradient(135deg, var(--coral), #ff9d7d);
+            border-radius: 12px;
+            padding: 15px;
+            color: var(--white);
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(255, 113, 91, 0.3);
+        }
+
+        .points-display h3 {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .points-display p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .level-progress {
+            margin-top: 15px;
+        }
+
+        .level-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.8rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--white);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            margin: 25px 20px 15px;
+            color: var(--dark-gray);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 10px;
+            color: var(--coral);
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 0 20px;
+        }
+
+        .action-button {
+            background-color: var(--white);
+            border: none;
+            border-radius: 12px;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .action-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .action-button i {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: var(--teal);
+        }
+
+        .action-button p {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        .rewards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+
+        .reward-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .reward-card:active {
+            transform: translateY(2px);
+        }
+
+        .reward-image {
+            height: 150px;
+            width: auto;
+            /*       height: 100px; */
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            font-size: 2rem;
+        }
+
+        .reward-info {
+            padding: 12px;
+        }
+
+        .reward-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--dark-gray);
+        }
+
+        .reward-points {
+            font-size: 0.8rem;
+            color: var(--coral);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+        .reward-points i {
+            margin-right: 5px;
+        }
+
+        .achievements-list {
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+
+        .achievement-item {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+        }
+
+        .achievement-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--teal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.5rem;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .achievement-info {
+            flex-grow: 1;
+        }
+
+        .achievement-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--dark-gray);
+        }
+
+        .achievement-description {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        .locked-achievement {
+            opacity: 0.5;
+        }
+
+        .locked-achievement .achievement-icon {
+            background-color: #aaa;
+        }
+
+        .locked-achievement .achievement-icon::after {
+            content: "🔒";
+            position: absolute;
+            font-size: 1rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: space-around;
+            background-color: var(--white);
+            padding: 15px 20px;
+            border-radius: 15px 15px 0 0;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 480px;
+            margin: 0 auto;
+            z-index: 100;
+        }
+
+        .nav-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #aaa;
+            font-size: 0.8rem;
+            transition: color 0.2s;
+        }
+
+        .nav-tab i {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .nav-tab.active {
+            color: var(--teal);
+        }
+
+        .page {
+            display: none;
+            padding-bottom: 80px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            color: var(--dark-gray);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--teal);
+            color: var(--white);
+        }
+
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: var(--dark-gray);
+            margin-right: 10px;
+        }
+
+        .reward-detail {
+            text-align: center;
+        }
+
+        .reward-detail-image {
+            width: 100px;
+            height: 100px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: #aaa;
+        }
+
+        .reward-detail-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--dark-gray);
+        }
+
+        .reward-detail-description {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 15px;
+        }
+
+        .reward-detail-points {
+            font-size: 1.1rem;
+            color: var(--coral);
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .reward-detail-points i {
+            margin-right: 5px;
+        }
+
+        .history-list {
+            padding: 0 20px;
+        }
+
+        .history-item {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .history-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+
+        .history-date {
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        .history-points {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .history-points.positive {
+            color: var(--teal);
+        }
+
+        .history-points.negative {
+            color: var(--coral);
+        }
+
+        .redemption-code {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .redemption-code-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--dark-gray);
+            margin-bottom: 5px;
+        }
+
+        .redemption-code-label {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--white);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background-color: var(--dark-gray);
+            color: var(--white);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            transition: transform 0.3s;
+            max-width: 90%;
+        }
+
+        .notification.active {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .notification.success {
+            background-color: var(--teal);
+        }
+
+        .notification.error {
+            background-color: var(--coral);
+        }
+
+        .achievement-unlocked {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background-color: var(--white);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            max-width: 90%;
+        }
+
+        .achievement-unlocked.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .achievement-unlocked-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            animation: bounce 1s ease infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .achievement-unlocked-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 5px;
+        }
+
+        .achievement-unlocked-description {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 15px;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--coral);
+            opacity: 0;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+            }
+        }
+
+        .confetti {
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: #aaa;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            font-size: 0.9rem;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-5px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(5px);
+            }
+        }
+
+        .opacity-50 {
+            opacity: 0.5;
+        }
+
+        .text-red-500 {
+            color: #ef4444;
+        }
+
+        .text-xs {
+            font-size: 0.75rem;
+        }
+
+        .mt-1 {
+            margin-top: 0.25rem;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .qr-code-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .qr-code-image {
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .qr-code-info {
+            text-align: center;
+            color: #777;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div id="home-page" class="page active">
+            <div class="header">
+                <h1>Food Rewards</h1>
+                <p>สะสมแต้ม รับรางวัล</p>
+            </div>
+
+            <div class="profile-section">
+                <div class="profile-info">
+
+                    <div class="w-14 h-14 rounded-full overflow-hidden border-2 border-accent-cyan mr-3">
+                        <img id="userImg"
+                            src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjhjcWswOWk5ZGdnZ29oZjE3ZmFmd3dxeTBuMTdtemhmaXFhMXl0YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/U5DM9YQUbZ2aIVgpKZ/giphy.gif"
+                            alt="User" class="w-full h-full object-cover">
+                    </div>
+
+                    <div class="profile-details">
+                        <h2 id="user-name">กำลังโหลด...</h2>
+                        <p>สมาชิก</p>
+                    </div>
+                </div>
+
+                <div class="points-display">
+                    <h3 id="user-points">0</h3>
+                    <p>แต้มสะสม</p>
+
+                    <div class="level-progress">
+                        <div class="level-info">
+                            <span>ระดับ <span id="user-level">1</span></span>
+                            <span>ระดับ <span id="next-level">2</span></span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="level-progress-fill" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-title"><i class="fas fa-bolt"></i> ทำรายการ</h2>
+
+            <div class="action-buttons">
+                <button class="action-button" onclick="openScannerModal()">
+                    <i class="fas fa-qrcode"></i>
+                    <p>สแกน QR Code</p>
+                </button>
+                <button class="action-button" onclick="openMyQRModal()">
+                    <i class="fas fa-mobile-alt"></i>
+                    <p>QR Code ของฉัน</p>
+                </button>
+                <button class="action-button" onclick="navigateTo('rewards-page')">
+                    <i class="fas fa-gift"></i>
+                    <p>แลกของรางวัล</p>
+                </button>
+                <button class="action-button" onclick="navigateTo('achievements-page')">
+                    <i class="fas fa-trophy"></i>
+                    <p>ความสำเร็จ</p>
+                </button>
+            </div>
+
+            <h2 class="section-title"><i class="fas fa-trophy"></i> ความสำเร็จล่าสุด</h2>
+
+            <div class="achievements-list" id="recent-achievements">
+
+                <div class="empty-state">
+                    <i class="fas fa-trophy"></i>
+                    <p>ยังไม่มีความสำเร็จ</p>
+                </div>
+            </div>
+
+            <h2 class="section-title"><i class="fas fa-history"></i> ประวัติล่าสุด</h2>
+
+            <div class="history-list" id="recent-history">
+                <!-- โหลดข้อมูล history -->
+                <div class="empty-state">
+                    <i class="fas fa-history"></i>
+                    <p>ยังไม่มีประวัติการทำรายการ</p>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="rewards-page" class="page">
+            <div class="header">
+                <h1>ของรางวัล</h1>
+                <p>แลกแต้มเพื่อรับของรางวัล</p>
+            </div>
+
+            <div class="profile-section">
+                <div class="points-display">
+                    <h3 id="rewards-user-points">0</h3>
+                    <p>แต้มสะสม</p>
+                </div>
+            </div>
+
+            <div class="rewards-grid" id="rewards-grid">
+                <!-- โหลด Rewards  -->
+            </div>
+        </div>
+
+
+        <div id="achievements-page" class="page">
+            <div class="header">
+                <h1>ความสำเร็จ</h1>
+                <p>รวบรวมความสำเร็จทั้งหมด</p>
+            </div>
+
+            <div class="achievements-list" id="all-achievements">
+                <!-- โหลด All achievements -->
+            </div>
+        </div>
+
+
+        <div id="history-page" class="page">
+            <div class="header">
+                <h1>ประวัติ</h1>
+                <p>ประวัติการทำรายการทั้งหมด</p>
+            </div>
+
+            <div class="history-list" id="all-history">
+                <!--โหลดประวัติ All history -->
+            </div>
+        </div>
+
+
+        <div class="nav-tabs">
+            <a href="#" class="nav-tab active" onclick="navigateTo('home-page')">
+                <i class="fas fa-home"></i>
+                <span>หน้าหลัก</span>
+            </a>
+            <a href="#" class="nav-tab" onclick="navigateTo('rewards-page')">
+                <i class="fas fa-gift"></i>
+                <span>รางวัล</span>
+            </a>
+            <a href="#" class="nav-tab" onclick="navigateTo('achievements-page')">
+                <i class="fas fa-trophy"></i>
+                <span>ความสำเร็จ</span>
+            </a>
+            <a href="#" class="nav-tab" onclick="navigateTo('history-page')">
+                <i class="fas fa-history"></i>
+                <span>ประวัติ</span>
+            </a>
+        </div>
+    </div>
+
+
+    <div id="scanner-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">สแกน QR Code</h3>
+                <button class="modal-close" onclick="closeModal('scanner-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-center">กำลังเปิดกล้องสำหรับสแกน QR Code...</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('scanner-modal')">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="myqr-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">QR Code ของฉัน</h3>
+                <button class="modal-close" onclick="closeModal('myqr-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="qr-code-container">
+                    <img id="user-qr-code" class="qr-code-image" src="" alt="User QR Code" style="display: none;">
+                    <div class="qr-code-info">
+                        <p>แสดง QR Code นี้ให้ร้านค้าเพื่อรับแต้ม</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('myqr-modal')">ปิด</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="reward-detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">รายละเอียดรางวัล</h3>
+                <button class="modal-close" onclick="closeModal('reward-detail-modal')">❌</button>
+            </div>
+            <div class="modal-body">
+                <div class="reward-detail">
+                    <div class="reward-detail-image">
+                        <img id="rewardImage" src="" alt="reward" class="w-full h-full object-cover">
+                    </div>
+                    <h3 id="reward-detail-title" class="reward-detail-title">ชื่อรางวัล</h3>
+                    <p id="reward-detail-description" class="reward-detail-description">รายละเอียดรางวัล</p>
+                    <div id="reward-detail-points" class="reward-detail-points">
+                        <i class="fas fa-star"></i> 100 แต้ม
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('reward-detail-modal')">ยกเลิก</button>
+                <button id="redeem-button" class="btn btn-primary" onclick="redeemReward()">แลกรางวัล</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="redemption-success-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">แลกรางวัลสำเร็จ</h3>
+                <button class="modal-close" onclick="closeModal('redemption-success-modal')">❌</button>
+            </div>
+            <div class="modal-body">
+                <div class="reward-detail">
+                    <div class="reward-detail-image">
+                        <i class="fas fa-check-circle" style="color: var(--teal);"></i>
+                    </div>
+                    <h3 id="success-reward-title" class="reward-detail-title">ชื่อรางวัล</h3>
+                    <p class="reward-detail-description">คุณได้แลกรางวัลนี้เรียบร้อยแล้ว</p>
+
+                    <div class="redemption-code">
+                        <p id="redemption-code-value" class="redemption-code-value">ABCD1234</p>
+                        <p class="redemption-code-label">รหัสแลกรับรางวัล</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('redemption-success-modal')">ตกลง</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+
+    <div id="notification" class="notification error">
+        <span id="notification-message">เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้</span>
+    </div>
+
+
+    <div id="achievement-unlocked" class="achievement-unlocked">
+        <div id="achievement-unlocked-icon" class="achievement-unlocked-icon">🏆</div>
+        <h3 id="achievement-unlocked-title" class="achievement-unlocked-title">ความสำเร็จใหม่!</h3>
+        <p id="achievement-unlocked-description" class="achievement-unlocked-description">คุณได้รับความสำเร็จใหม่</p>
+        <button class="btn btn-primary" onclick="closeAchievementUnlocked()">ตกลง</button>
+    </div>
+
+    <script>
+
+        const API_URL = "https://script.google.com/macros/s/AKfycbyzOVhXBeaSaf3GtvF_yFVFdloSNZj2aQE0Yl5rRt0zm5eI9l8ZxsUUKH0Jtyh-JXY/exec";
+        const LIFF_ID = "2007275029-DAYbVeEL";
+        const QR_API_URL = "https://api.qrserver.com/v1/create-qr-code/?data=";
+        const botBasicId = "@228fxaha"
+        let userData = null;
+        let rewards = [];
+        let achievements = [];
+        let transactions = [];
+        let currentReward = null;
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            initializeLIFF();
+        });
+
+
+        function initializeLIFF() {
+            liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true })
+                .then(() => {
+                    if (!liff.isLoggedIn()) {
+                        liff.login({ redirectUri: window.location.href });
+                    } else {
+                        initializeApp();
+                        liff.getFriendship().then((data) => {
+                            if (!data.friendFlag) {
+                                Swal.fire('เดี๋ยวก่อน!', 'คุณยังไม่ได้เป็นเพื่อนกับเรา', 'error').then(() => {
+                                    window.location = 'https://line.me/R/ti/p/' + botBasicId
+                                })
+                            }
+                        });
+
+                    }
+                })
+                .catch(err => {
+                    showNotification("เกิดข้อผิดพลาดในการเชื่อมต่อกับ LINE", "error");
+                    console.error(err);
+                });
+        }
+
+
+        function initializeApp() {
+            showLoading();
+
+
+            liff.getProfile()
+                .then(profile => {
+
+                    return callAPI("registerUser", {
+                        userId: profile.userId,
+                        displayName: profile.displayName,
+                    });
+                })
+                .then(result => {
+                    if (result.success) {
+                        userData = result.user;
+                        updateUserInfo();
+                        loadRewards();
+                        loadAchievements();
+                        loadHistory();
+                    } else {
+                        showNotification("เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้", "error");
+                    }
+                })
+                .catch(err => {
+                    showNotification("เกิดข้อผิดพลาดในการโหลดข้อมูล", "error");
+                    console.error(err);
+                })
+                .finally(() => {
+                    hideLoading();
+                });
+        }
+
+
+        function updateUserInfo() {
+            if (!userData) return;
+
+
+            document.getElementById("user-name").textContent = userData.displayName || "สมาชิก";
+            document.getElementById("userImg").src = liff.getDecodedIDToken().picture || 'https://img.icons8.com/?size=100&id=8v2YbO_KCK_5&format=png&color=000000';
+
+
+            document.getElementById("user-points").textContent = userData.points.toLocaleString();
+            document.getElementById("rewards-user-points").textContent = userData.points.toLocaleString();
+
+
+            document.getElementById("user-level").textContent = userData.level;
+            document.getElementById("next-level").textContent = userData.level + 1;
+
+
+            const pointsInCurrentLevel = userData.points - ((userData.level - 1) * 100);
+            const progressPercentage = Math.min(pointsInCurrentLevel, 100);
+            document.getElementById("level-progress-fill").style.width = `${progressPercentage}%`;
+        }
+
+
+        function generateUserQRCode() {
+            if (!userData) return "";
+
+
+            const qrUrl = QR_API_URL + encodeURIComponent(userData.userId) + "&size=200x200";
+            return qrUrl;
+        }
+
+
+        function openMyQRModal() {
+            const qrCodeImg = document.getElementById("user-qr-code");
+            const qrUrl = generateUserQRCode();
+
+            if (qrUrl) {
+                qrCodeImg.src = qrUrl;
+                qrCodeImg.style.display = "block";
+            }
+
+            openModal("myqr-modal");
+        }
+
+
+        function loadRewards() {
+            callAPI("getRewards")
+                .then(result => {
+                    if (result.success) {
+                        rewards = result.rewards;
+                        displayRewards();
+                    } else {
+                        showNotification("เกิดข้อผิดพลาดในการโหลดรางวัล", "error");
+                    }
+                })
+                .catch(err => {
+                    showNotification("เกิดข้อผิดพลาดในการโหลดรางวัล", "error");
+                    console.error(err);
+                });
+        }
+
+
+        function displayRewards() {
+            const rewardsGrid = document.getElementById("rewards-grid");
+            rewardsGrid.innerHTML = "";
+
+            if (rewards.length === 0) {
+                rewardsGrid.innerHTML = `
+          <div class="empty-state" style="grid-column: span 2;">
+            <i class="fas fa-gift"></i>
+            <p>ยังไม่มีรางวัล</p>
+          </div>
+        `;
+                return;
+            }
+
+            rewards.forEach(reward => {
+                const canRedeem = userData.points >= reward.pointsRequired;
+                const isOutOfStock = reward.stock !== -1 && reward.stock <= 0;
+
+                const rewardCard = document.createElement("div");
+                rewardCard.className = `reward-card ${!canRedeem || isOutOfStock ? "opacity-50" : ""}`;
+                rewardCard.onclick = () => showRewardDetail(reward);
+
+                rewardCard.innerHTML = `
+          <div class="reward-image">
+            <img  src="${reward.image}" alt="reward" class="w-full h-full object-cover">
+          </div>
+          <div class="reward-info">
+            <h3 class="reward-title">${reward.title}</h3>
+            <div class="reward-points">
+              <i class="fas fa-star"></i> ${reward.pointsRequired.toLocaleString()} แต้ม
+            </div>
+            ${isOutOfStock ? '<div class="text-red-500 text-xs mt-1">หมด</div>' : ''}
+          </div>
+        `;
+
+                rewardsGrid.appendChild(rewardCard);
+            });
+        }
+
+
+        function showRewardDetail(reward) {
+            currentReward = reward;
+            document.getElementById("rewardImage").src = reward.image;
+            document.getElementById("reward-detail-title").textContent = reward.title;
+            document.getElementById("reward-detail-description").textContent = reward.description;
+            document.getElementById("reward-detail-points").innerHTML = `<i class="fas fa-star"></i> ${reward.pointsRequired.toLocaleString()} แต้ม`;
+
+            const canRedeem = userData.points >= reward.pointsRequired;
+            const isOutOfStock = reward.stock !== -1 && reward.stock <= 0;
+
+            const redeemButton = document.getElementById("redeem-button");
+            redeemButton.disabled = !canRedeem || isOutOfStock;
+            redeemButton.classList.toggle("opacity-50", !canRedeem || isOutOfStock);
+
+            if (!canRedeem) {
+                redeemButton.textContent = "แต้มไม่พอ";
+            } else if (isOutOfStock) {
+                redeemButton.textContent = "หมด";
+            } else {
+                redeemButton.textContent = "แลกรางวัล";
+            }
+
+            openModal("reward-detail-modal");
+        }
+
+
+        function redeemReward() {
+            if (!currentReward) return;
+
+            showLoading();
+
+            callAPI("redeemReward", {
+                userId: userData.userId,
+                rewardId: currentReward.id
+            })
+                .then(result => {
+                    if (result.success) {
+
+                        userData.points = result.newPoints;
+                        updateUserInfo();
+
+
+                        document.getElementById("success-reward-title").textContent = currentReward.title;
+                        document.getElementById("redemption-code-value").textContent = result.redemptionCode;
+
+                        closeModal("reward-detail-modal");
+
+                        openModal("redemption-success-modal");
+
+
+                        loadRewards();
+                        loadHistory();
+                        const flexMessage = JSON.parse(result.body);
+                        sendText([flexMessage]);
+
+                        createConfetti();
+                    } else {
+                        showNotification(result.message || "เกิดข้อผิดพลาดในการแลกรางวัล", "error");
+                    }
+                })
+                .catch(err => {
+                    showNotification("เกิดข้อผิดพลาดในการแลกรางวัล", "error");
+                    console.error(err);
+                })
+                .finally(() => {
+                    hideLoading();
+                });
+        }
+
+
+        function loadAchievements() {
+            callAPI("getAchievements")
+                .then(result => {
+                    if (result.success) {
+                        achievements = result.achievements;
+
+
+                        return callAPI("getUserAchievements", {
+                            userId: userData.userId
+                        });
+                    } else {
+                        throw new Error("Failed to load achievements");
+                    }
+                })
+                .then(result => {
+                    if (result.success) {
+                        const userAchievements = result.achievements;
+
+
+                        achievements.forEach(achievement => {
+                            achievement.unlocked = userAchievements.some(ua => ua.id === achievement.id);
+                        });
+
+                        displayAchievements();
+                    } else {
+                        throw new Error("Failed to load user achievements");
+                    }
+                })
+                .catch(err => {
+                    showNotification("เกิดข้อผิดพลาดในการโหลดความสำเร็จ", "error");
+                    console.error(err);
+                });
+        }
+
+
+        function displayAchievements() {
+            const recentAchievements = document.getElementById("recent-achievements");
+            const allAchievements = document.getElementById("all-achievements");
+
+            recentAchievements.innerHTML = "";
+            allAchievements.innerHTML = "";
+
+            const unlockedAchievements = achievements.filter(a => a.unlocked);
+            const lockedAchievements = achievements.filter(a => !a.unlocked);
+
+            // Display recent achievements (max 3)
+            if (unlockedAchievements.length === 0) {
+                recentAchievements.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-trophy"></i>
+            <p>ยังไม่มีความสำเร็จ</p>
+          </div>
+        `;
+            } else {
+                unlockedAchievements.slice(0, 3).forEach(achievement => {
+                    const achievementItem = createAchievementItem(achievement);
+                    recentAchievements.appendChild(achievementItem);
+                });
+            }
+
+
+            if (achievements.length === 0) {
+                allAchievements.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-trophy"></i>
+            <p>ยังไม่มีความสำเร็จ</p>
+          </div>
+        `;
+            } else {
+
+                unlockedAchievements.forEach(achievement => {
+                    const achievementItem = createAchievementItem(achievement);
+                    allAchievements.appendChild(achievementItem);
+                });
+
+
+                lockedAchievements.forEach(achievement => {
+                    const achievementItem = createAchievementItem(achievement, true);
+                    allAchievements.appendChild(achievementItem);
+                });
+            }
+        }
+
+
+        function createAchievementItem(achievement, locked = false) {
+            const achievementItem = document.createElement("div");
+            achievementItem.className = `achievement-item ${locked ? "locked-achievement" : ""}`;
+
+            achievementItem.innerHTML = `
+        <div class="achievement-icon">
+          ${achievement.emoji || "🏆"}
+        </div>
+        <div class="achievement-info">
+          <h3 class="achievement-title">${achievement.title}</h3>
+          <p class="achievement-description">${achievement.description}</p>
+        </div>
+      `;
+
+            return achievementItem;
+        }
+
+
+        function loadHistory() {
+            callAPI("getUserInfo", {
+                userId: userData.userId
+            })
+                .then(result => {
+                    if (result.success) {
+                        transactions = result.transactions || [];
+                        displayHistory();
+                    } else {
+                        showNotification("เกิดข้อผิดพลาดในการโหลดประวัติ", "error");
+                    }
+                })
+                .catch(err => {
+                    showNotification("เกิดข้อผิดพลาดในการโหลดประวัติ", "error");
+                    console.error(err);
+                });
+        }
+
+
+        function displayHistory() {
+            const recentHistory = document.getElementById("recent-history");
+            const allHistory = document.getElementById("all-history");
+
+            recentHistory.innerHTML = "";
+            allHistory.innerHTML = "";
+
+            if (transactions.length === 0) {
+                recentHistory.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-history"></i>
+            <p>ยังไม่มีประวัติการทำรายการ</p>
+          </div>
+        `;
+
+                allHistory.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-history"></i>
+            <p>ยังไม่มีประวัติการทำรายการ</p>
+          </div>
+        `;
+                return;
+            }
+
+
+            const sortedTransactions = [...transactions].sort((a, b) => {
+                return new Date(b.timestamp) - new Date(a.timestamp);
+            });
+
+            // Display recent history (max 5)
+            sortedTransactions.slice(0, 5).forEach(transaction => {
+                const historyItem = createHistoryItem(transaction);
+                recentHistory.appendChild(historyItem);
+            });
+
+
+            sortedTransactions.forEach(transaction => {
+                const historyItem = createHistoryItem(transaction);
+                allHistory.appendChild(historyItem);
+            });
+        }
+
+
+        function createHistoryItem(transaction) {
+            const historyItem = document.createElement("div");
+            historyItem.className = "history-item fade-in";
+
+            const date = new Date(transaction.timestamp);
+            const shortDate = formatDateShort(`${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`)
+            const formattedDate = `${shortDate} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')} น.`;
+
+            const isPositive = transaction.points > 0;
+
+            historyItem.innerHTML = `
+        <div class="history-header">
+          <h3 class="history-title">${transaction.description}</h3>
+          <span class="history-date">${formattedDate}</span>
+        </div>
+        <div class="history-points ${isPositive ? 'positive' : 'negative'}">
+          ${isPositive ? '+' : ''}${transaction.points.toLocaleString()} แต้ม
+        </div>
+      `;
+
+            return historyItem;
+        }
+
+
+        function openScannerModal() {
+            openModal("scanner-modal");
+            startLIFFScanner();
+        }
+
+
+        function startLIFFScanner() {
+            const os = liff.getOS();
+            if (os === "ios" || os === "web") {
+
+                if (!liff.scanCodeV2) {
+                    showNotification("ไม่สามารถใช้งานการสแกน QR Code ได้", "error");
+                    closeModal("scanner-modal");
+                    return;
+                }
+
+                liff.scanCodeV2()
+                    .then(result => {
+                        if (result) {
+                            console.log("QR Code scanned:", result.value);
+                            processQRCode(result.value);
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Scan error:", err);
+                        if (err.code === 'CANCEL') {
+                            showNotification("ยกเลิกการสแกน", "error");
+                        } else {
+                            showNotification("เกิดข้อผิดพลาดในการสแกน QR Code", "error");
+                        }
+                    })
+                    .finally(() => {
+                        closeModal("scanner-modal");
+                    });
+            }
+            if (os === "android") {
+
+                if (!liff.scanCodeV2) {
+                    showNotification("ไม่สามารถใช้งานการสแกน QR Code ได้", "error");
+                    closeModal("scanner-modal");
+                    return;
+                }
+
+                liff.scanCode()
+                    .then(result => {
+                        if (result) {
+                            console.log("QR Code scanned:", result.value);
+                            processQRCode(result.value);
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Scan error:", err);
+                        if (err.code === 'CANCEL') {
+                            showNotification("ยกเลิกการสแกน", "error");
+                        } else {
+                            showNotification("เกิดข้อผิดพลาดในการสแกน QR Code", "error");
+                        }
+                    })
+                    .finally(() => {
+                        closeModal("scanner-modal");
+                    });
+
+            }
+
+        }
+
+
+        function processQRCode(qrCode) {
+            showLoading();
+
+            callAPI("addPoints", {
+                userId: userData.userId,
+                qrCode: qrCode
+            })
+                .then(result => {
+                    if (result.success) {
+
+                        userData.points = result.newPoints;
+                        userData.level = result.newLevel;
+                        updateUserInfo();
+
+
+                        showNotification(`เพิ่ม ${result.message.split(' ')[1]} แต้มสำเร็จ!`, "success");
+
+
+                        loadHistory();
+                        loadRewards();
+                        const flexMessage = JSON.parse(result.body);
+                        sendText([flexMessage]);
+
+                        checkNewAchievements();
+                    } else {
+                        showNotification(result.message || "เกิดข้อผิดพลาดในการสแกน QR Code", "error");
+                    }
+                })
+                .catch(err => {
+                    showNotification("เกิดข้อผิดพลาดในการสแกน QR Code", "error");
+                    console.error(err);
+                })
+                .finally(() => {
+                    hideLoading();
+                });
+        }
+
+
+        function checkNewAchievements() {
+            callAPI("getUserAchievements", {
+                userId: userData.userId
+            })
+                .then(result => {
+                    if (result.success) {
+                        const newAchievements = result.achievements.filter(
+                            a => !achievements.find(old => old.id === a.id && old.unlocked)
+                        );
+
+                        if (newAchievements.length > 0) {
+
+                            achievements.forEach(achievement => {
+                                const found = result.achievements.find(a => a.id === achievement.id);
+                                if (found) {
+                                    achievement.unlocked = true;
+                                }
+                            });
+
+
+                            displayAchievements();
+
+
+                            showAchievementUnlocked(newAchievements[0]);
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                });
+        }
+
+
+        function showAchievementUnlocked(achievement) {
+            document.getElementById("achievement-unlocked-icon").textContent = achievement.emoji || "🏆";
+            document.getElementById("achievement-unlocked-title").textContent = achievement.title;
+            document.getElementById("achievement-unlocked-description").textContent = achievement.description;
+
+            document.getElementById("achievement-unlocked").classList.add("active");
+            createConfetti();
+        }
+
+
+        function closeAchievementUnlocked() {
+            document.getElementById("achievement-unlocked").classList.remove("active");
+        }
+
+
+        function createConfetti() {
+            const container = document.body;
+            const confettiCount = 100;
+            const colors = [
+                "var(--coral)",
+                "var(--teal)",
+                "var(--brown)",
+                "#FFD700",
+                "#FF4500"
+            ];
+
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement("div");
+                confetti.className = "confetti";
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = `${Math.random() * 10 + 5}px`;
+                confetti.style.height = `${Math.random() * 10 + 5}px`;
+                confetti.style.opacity = Math.random();
+                confetti.style.position = "absolute";
+                confetti.style.top = `-${Math.random() * 20}px`;
+                confetti.style.borderRadius = "50%";
+                confetti.style.zIndex = 9999;
+                confetti.style.animation = `confetti-fall ${Math.random() * 3 + 2}s linear forwards`;
+
+                container.appendChild(confetti);
+
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+
+        function navigateTo(pageId) {
+
+            document.querySelectorAll(".page").forEach(page => {
+                page.classList.remove("active");
+            });
+
+
+            document.getElementById(pageId).classList.add("active");
+
+
+            document.querySelectorAll(".nav-tab").forEach(tab => {
+                tab.classList.remove("active");
+            });
+
+            document.querySelector(`.nav-tab[onclick="navigateTo('${pageId}')"]`).classList.add("active");
+
+
+            window.scrollTo(0, 0);
+        }
+
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add("active");
+
+            setTimeout(() => {
+                modal.querySelector(".modal-content").style.transform = "translateY(0)";
+                modal.querySelector(".modal-content").style.opacity = "1";
+            }, 10);
+        }
+
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+
+            modal.querySelector(".modal-content").style.transform = "translateY(20px)";
+            modal.querySelector(".modal-content").style.opacity = "0";
+
+            setTimeout(() => {
+                modal.classList.remove("active");
+            }, 300);
+        }
+
+
+        function showLoading() {
+            document.getElementById("loading-overlay").classList.add("active");
+        }
+
+
+        function hideLoading() {
+            document.getElementById("loading-overlay").classList.remove("active");
+        }
+
+
+        function showNotification(message, type = "default") {
+            const notification = document.getElementById("notification");
+            notification.className = `notification ${type}`;
+            document.getElementById("notification-message").textContent = message;
+
+            notification.classList.add("active");
+
+            setTimeout(() => {
+                notification.classList.remove("active");
+            }, 3000);
+        }
+
+
+        function callAPI(action, params = {}) {
+            const formData = new URLSearchParams();
+            formData.append("action", action);
+
+
+            Object.keys(params).forEach(key => {
+                formData.append(key, params[key]);
+            });
+
+            return fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: formData
+            })
+                .then(response => response.json())
+                .catch(error => {
+                    console.error("API Error:", error);
+                    return { success: false, message: "Network error" };
+                });
+        }
+
+        function formatDateShort(dateString) {
+            if (!dateString) return '-';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) {
+                    return dateString;
+                }
+                return date.toLocaleDateString('th-TH', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            } catch (e) {
+                console.error("Error formatting date:", dateString, e);
+                return dateString;
+            }
+        }
+
+        function sendText(text) {
+            if (!liff.isInClient()) {
+                shareTargetPicker(text);
+            } else {
+                sendflex(text);
+            }
+        }
+        function sendflex(text) {
+            liff.sendMessages(text).then(function () {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: "top-end",
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.onmouseenter = Swal.stopTimer;
+                        toast.onmouseleave = Swal.resumeTimer;
+                    }
+                });
+                Toast.fire({
+                    icon: "success",
+                    title: "ส่งเข้าแชทเรียบร้อย"
+                });
+                console.log("Send Message Success!");
+
+            })
+        }
+        function shareTargetPicker(text) {
+            liff.shareTargetPicker(text).then(function (res) {
+                if (res) {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: "top-end",
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.onmouseenter = Swal.stopTimer;
+                            toast.onmouseleave = Swal.resumeTimer;
+                        }
+                    });
+                    Toast.fire({
+                        icon: "success",
+                        title: "ส่งเข้าแชทเรียบร้อย"
+                    });
+
+                } else {
+
+                    console.log("TargetPicker was closed!");
+                }
+            }).catch(function (error) {
+                window.alert("Failed to send message " + error);
+            });
+        }
+    </script>
+</body>
+
+</html>
