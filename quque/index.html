@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>กำลังโหลดข้อมูล...</title>
+  <meta name="description" content="Queue for LIFF App" />
+  <meta name="author" content="iton5" />
+  <meta property="og:title" content="Queue-HofKrisda-thailand" />
+  <meta property="og:description" content="Queue for LIFF App" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://image.makewebcdn.com/makeweb/0/pMrtkmxgt/1_pngstk/golf7.png?v=202405291424" />
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://bit.ly/fontiton5" type="text/css" charset="utf-8" />
+
+  <style>
+    body {
+      font-family: 'line_seed_sans_th';
+      overflow: hidden;
+    }
+
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 0.7;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    .loader-plate {
+      width: 120px;
+      height: 120px;
+      border: 5px solid #F0F0F0;
+      border-top-color: #FF6B6B;
+      border-radius: 50%;
+      animation: spin 1.2s linear infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loader-icon {
+      width: 50px;
+      height: 50px;
+      color: #FF6B6B;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+  </style>
+</head>
+
+<body class="bg-white">
+
+
+  <div id="loading-screen"
+    class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white transition-opacity duration-500 ease-in-out">
+    <div class="loader-plate">
+
+
+      <svg class="w-10 h-10 text-red-800 loader-icon" xmlns="http://www.w3.org/2000/svg" width="200" height="200"
+        viewBox="0 0 20 20">
+        <path fill="currentColor"
+          d="M6.5 7.5a2.25 2.25 0 1 0 0-4.5a2.25 2.25 0 0 0 0 4.5Zm0-1a1.25 1.25 0 1 1 0-2.5a1.25 1.25 0 0 1 0 2.5ZM3 9a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v4.5a3.5 3.5 0 1 1-7 0V9Zm1 0v4.5a2.5 2.5 0 0 0 5 0V9H4Zm5.626-2.857a3.234 3.234 0 0 1-.396.87c.413.048.787.22 1.084.48a2.25 2.25 0 1 0-1.127-4.07c.193.282.342.597.439.934a1.25 1.25 0 1 1 0 1.787Zm-.127 10.712A3.5 3.5 0 0 0 14 13.5V9a1 1 0 0 0-1-1h-2.267c.17.294.268.636.268 1h2v4.5a2.5 2.5 0 0 1-2.75 2.488c-.213.32-.465.611-.75.867Zm4.127-10.712a3.236 3.236 0 0 1-.396.87c.413.048.787.22 1.084.48a2.25 2.25 0 1 0-1.127-4.07c.193.282.342.597.439.934a1.25 1.25 0 1 1 0 1.787Zm-.127 10.712A3.5 3.5 0 0 0 18 13.5V9a1 1 0 0 0-1-1h-2.267c.17.294.268.636.268 1h2v4.5a2.5 2.5 0 0 1-2.75 2.488c-.213.32-.465.611-.75.867Z" />
+      </svg>
+    </div>
+    <p class="mt-6 text-lg font-semibold text-gray-700 tracking-wide">กำลังโหลดข้อมูล...</p>
+    <p class="text-sm text-gray-500">กรุณารอสักครู่</p>
+  </div>
+
+
+  <div id="error-screen"
+    class="hidden fixed inset-0 z-40 flex-col items-center justify-center bg-red-50 p-6 text-center">
+    <div class="mb-4">
+      <svg class="w-16 h-16 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+    </div>
+    <h2 class="text-xl font-bold text-red-700">เกิดข้อผิดพลาด</h2>
+    <p id="error-message" class="mt-2 text-red-600"></p>
+  </div>
+
+  <script>
+    const basePath = "https://www.hofkrisda.com/HOF_Project/30jun_queue";
+    const liffId = "2007275029-1NqkaLlV";
+
+    const loadingScreen = document.getElementById('loading-screen');
+    const errorScreen = document.getElementById('error-screen');
+    const errorMessageElement = document.getElementById('error-message');
+
+    async function main() {
+      try {
+        await liff.init({ liffId: liffId, withLoginOnExternalBrowser: true });
+
+
+        loadingScreen.style.opacity = '0';
+
+
+        setTimeout(() => {
+          const pathname = window.location.pathname;
+
+
+          if (pathname.includes("/adminqueue")) {
+            window.location.replace(`${basePath}/adminqueue.html`);
+          } else if (pathname.includes("/display")) {
+            window.location.replace(`${basePath}/display.html`);
+          } else if (pathname.includes("/queue.html?serviceType=B")) {
+            window.location.replace(`${basePath}/queue.html?serviceType=B`);
+          } else {
+            window.location.replace(`${basePath}/queue.html`);
+          }
+        }, 500);
+
+      } catch (error) {
+        console.error("LIFF initialization failed:", error);
+
+
+        loadingScreen.style.display = 'none';
+
+
+        errorMessageElement.textContent = error.message;
+        errorScreen.classList.remove('hidden');
+        errorScreen.classList.add('flex');
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", main);
+  </script>
+</body>
+
+</html>
