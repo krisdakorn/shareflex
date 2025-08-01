@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Booking" />
+    <meta name="author" content="HofKrisda" />
+    <meta property="og:title" content="Booking" />
+    <meta property="og:description" content="นัดหมายจองคิว" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://image.makewebcdn.com/makeweb/0/pMrtkmxgt/APNG_images/apng_09.png?v=202405291424" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/party-js@latest/bundle/party.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://bit.ly/fontiton5" type="text/css" charset="utf-8" />
+    <style type="text/css">
+        body {
+            font-family: 'line_seed_sans_th';
+            background: linear-gradient(135deg, #121212, #1e1e1e);
+            min-height: 100vh;
+        }
+
+        .banner {
+            background: linear-gradient(135deg, #b49a67, #ceb3ab);
+            box-shadow: 0 4px 20px rgba(180, 154, 103, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .banner::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+            animation: shimmer 8s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes shimmer {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .container-img {
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            animation: pulse 3s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+            }
+
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+            }
+        }
+
+        #button {
+            background: linear-gradient(135deg, #b49a67, #ceb3ab);
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(180, 154, 103, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #button::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 70%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        #button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(180, 154, 103, 0.6);
+        }
+
+        #button:hover::after {
+            opacity: 1;
+            animation: ripple 1s linear;
+        }
+
+        @keyframes ripple {
+            from {
+                transform: scale(0.5);
+                opacity: 1;
+            }
+
+            to {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        @keyframes bounce {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(-15px);
+            }
+        }
+
+        #loadingoverlay {
+            backdrop-filter: blur(8px);
+            transition: all 0.5s ease;
+        }
+
+        #loadingoverlay img {
+            max-width: 300px;
+            filter: drop-shadow(0 0 15px rgba(180, 154, 103, 0.6));
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #displayName {
+            position: relative;
+            padding-bottom: 2px;
+        }
+
+        #displayName::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: white;
+            transition: width 0.3s ease;
+        }
+
+        .wrapper-left:hover #displayName::after {
+            width: 100%;
+        }
+
+        /* New styles for queue items */
+        .queue-item {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(180, 154, 103, 0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border-left: 4px solid #b49a67;
+        }
+
+        .queue-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(180, 154, 103, 0.2);
+        }
+
+        .queue-item img {
+            border: 2px solid #ceb3ab;
+            transition: all 0.3s ease;
+        }
+
+        .queue-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .call-button {
+            background: linear-gradient(135deg, #b49a67, #ceb3ab);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(180, 154, 103, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .call-button::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 70%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .call-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(180, 154, 103, 0.5);
+        }
+
+        .call-button:hover::after {
+            opacity: 1;
+            animation: ripple 1s linear;
+        }
+
+        .empty-queue {
+            background: linear-gradient(135deg, rgba(180, 154, 103, 0.1), rgba(206, 179, 171, 0.1));
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(180, 154, 103, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .empty-queue h1 {
+            background: linear-gradient(135deg, #b49a67, #ceb3ab);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 600;
+        }
+    </style>
+    <title>Admin booking</title>
+</head>
+
+<body>
+    <section class="h-16 flex items-center justify-between px-7 w-full banner">
+        <div class="wrapper-left flex justify-between items-center space-x-5">
+            <div class="rounded-full container-img text-white w-10 h-10 flex justify-center items-center rounded-lg">
+                <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjg5ajlhemdyZjlrZDgwdjMwbTl1dGdtbnhvM2p4Y2t0ZnpnZnE4ciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l150Tal3EKqgj0v9gs/giphy.gif"
+                    class="rounded-full" alt="" id="pictureUrl">
+            </div>
+
+            <div class="text-white font-medium flex">
+                <h1 id="displayName" class="text-shadow">...</h1>
+            </div>
+        </div>
+        <div class="wrapper-right text-white flex justify-between items-center">
+            <button
+                class="group hover:translate-y-[-2px] flex space-x-2 transition-all duration-300 ease-in-out shadow-md rounded-full px-5 py-1.5"
+                id="button">
+                <span class="group-hover:text-white">ดูคิวทั้งหมด</span>
+                <span class="group-hover:hidden">📅</span>
+                <span class="group-hover:block hidden">📆</span>
+            </button>
+
+        </div>
+    </section>
+
+    <div id="myProject" class="fade-in p-4">
+
+    </div>
+
+    <div id="loadingoverlay"
+        class="fixed inset-0 bg-gray-500 bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExN2E5MWtuYjM5YTNpazF1cGxyd2ExbGcwM3VvcGlnbmt6eXBibHdseCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/7IKCOYtXi1SQg39DOi/giphy.gif"
+            alt="Loading..." class="max-w-xs md:max-w-sm lg:max-w-md rounded-lg shadow-2xl">
+    </div>
+    <script>
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            }
+        });
+        async function main() {
+            const liffId = '2007801752-WXXyzyzr';
+            try {
+                await liff.init({ liffId, withLoginOnExternalBrowser: true });
+
+                if (!liff.isLoggedIn()) {
+                    const destinationUrl = window.location.href;
+                    liff.login({ redirectUri: destinationUrl });
+                }
+
+                liff.ready.then(() => {
+                    const user = liff.getDecodedIDToken();
+                    if (user) {
+                        document.getElementById('pictureUrl').src = user.picture;
+                        document.getElementById('displayName').textContent = user.name;
+                    }
+                    getData();
+                });
+            } catch (error) {
+                console.error("LIFF initialization failed", error);
+            }
+        }
+
+
+
+        document.querySelector("#button").addEventListener("click", function () {
+
+            Toast.fire({
+                icon: "warning",
+                title: "ดำเนินการเรียกคิวทั้งหมด"
+            }).then(() => {
+                party.confetti(this)
+                setTimeout(function () {
+                    getData()
+                }, 3000);
+            });
+
+        });
+
+
+        const getData = () => {
+
+            $('#loadingoverlay').removeClass('hidden');
+
+            fetch('https://script.google.com/macros/s/AKfycbxq_BbmUZNrXEa87CIC4Wibbnl1lCEyZfZwjqYBxFTyK3ECoUQdZO4TpeyXsa214yT6/exec?q=Pending')
+                .then((response) => {
+
+                    $('#loadingoverlay').addClass('hidden');
+
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then((data) => {
+                    let dataHTML = '<div class="container mx-auto px-4 py-6 max-w-4xl">';
+
+                    if (data && data.length > 0) {
+                        dataHTML += '<h2 class="text-2xl font-semibold mb-6" style="color: #b49a67;">รายการคิวที่รอดำเนินการ</h2>';
+                        dataHTML += '<div class="space-y-4">';
+
+                        data.forEach((d, index) => {
+
+                            const delay = index * 0.1;
+
+                            dataHTML += `
+                                <div class="queue-item p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 fade-in" style="animation-delay: ${delay}s">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto">
+        <div class="overflow-hidden rounded-full h-12 w-12 flex-shrink-0 mb-3 sm:mb-0">
+            <img class="rounded-full h-12 w-12 object-cover" src="${d.column10 || "https://img.icons8.com/?size=100&id=K0whyGdxP7Ht&format=png&color=000000"}" alt="User Image">
+        </div>
+        <div class="ml-0 sm:ml-4 flex flex-col text-left">
+            <div class="leading-snug text-base font-bold" style="color: #b49a67;">${d.column2 || "productName"}</div>
+            <div class="leading-snug text-sm text-gray-600">ชื่อ: ${d.column5}</div>
+            <div class="leading-snug text-sm text-gray-600 flex items-center mt-1">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                ${formatDate(d.column3)}
+                <svg class="w-4 h-4 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                ${d.column4} น.
+            </div>
+        </div>
+    </div>
+    <button class="call-button h-10 px-5 text-sm font-medium rounded-full hover:shadow-lg flex items-center justify-center space-x-1 w-full sm:w-auto mt-4 sm:mt-0"
+            id="called"
+           onclick="sendToSheet('${d.column1}','${d.column7}', '${d.column2}', '${d.column3}', '${d.column4}')">
+            <svg class="w-6 h-6 text-gray-100 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+  <path d="M17.133 12.632v-1.8a5.407 5.407 0 0 0-4.154-5.262.955.955 0 0 0 .021-.106V3.1a1 1 0 0 0-2 0v2.364a.933.933 0 0 0 .021.106 5.406 5.406 0 0 0-4.154 5.262v1.8C6.867 15.018 5 15.614 5 16.807 5 17.4 5 18 5.538 18h12.924C19 18 19 17.4 19 16.807c0-1.193-1.867-1.789-1.867-4.175Zm-13.267-.8a1 1 0 0 1-1-1 9.424 9.424 0 0 1 2.517-6.391A1.001 1.001 0 1 1 6.854 5.8a7.43 7.43 0 0 0-1.988 5.037 1 1 0 0 1-1 .995Zm16.268 0a1 1 0 0 1-1-1A7.431 7.431 0 0 0 17.146 5.8a1 1 0 0 1 1.471-1.354 9.424 9.424 0 0 1 2.517 6.391 1 1 0 0 1-1 .995ZM8.823 19a3.453 3.453 0 0 0 6.354 0H8.823Z"/>
+</svg>
+
+        <span>เรียกคิว</span>
+    </button>
+</div>`;
+                        });
+
+                        dataHTML += '</div>';
+                    } else {
+                        dataHTML += `
+                            <div class="empty-queue min-h-[50vh] flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="text-6xl mb-4">😁</div>
+                                    <h1 class="text-3xl font-bold mb-4">ยังไม่มีลูกค้าจองคิวเข้ามา</h1>
+                                    <p class="text-gray-600">คุณจะได้รับการแจ้งเตือนเมื่อมีลูกค้าจองคิว</p>
+                                </div>
+                            </div>`;
+                    }
+
+                    dataHTML += '</div>';
+                    document.getElementById('myProject').innerHTML = dataHTML;
+                })
+                .catch((error) => {
+                    console.error("Failed to fetch data:", error);
+
+                    $('#loadingoverlay').addClass('hidden');
+
+                    document.getElementById('myProject').innerHTML = `
+                        <div class="container mx-auto px-4 py-6">
+                            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-md">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-red-700">
+                                            ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+        };
+
+        async function sendToSheet(productId ,userId, productName, datebook, timebook) {
+
+            try {
+                $('#loadingoverlay').removeClass('hidden');
+                const response = await $.post('https://script.google.com/macros/s/AKfycbxq_BbmUZNrXEa87CIC4Wibbnl1lCEyZfZwjqYBxFTyK3ECoUQdZO4TpeyXsa214yT6/exec', {
+                    productId: productId,
+                    userId: userId,
+                    productName: productName,
+                    datebook: datebook,
+                    timebook: timebook
+                });
+
+                if (response.statusCode === 200) {
+                    $('#loadingoverlay').addClass('hidden');
+                    const flexMessage = JSON.parse(response.body);
+                    Toast.fire({
+                        icon: "success",
+                        title: "ส่งแจ้งเตือนลูกค้าเรียบร้อย"
+                    }).then(() => {
+                        // sendMessages([flexMessage]);
+
+                        getData();
+                    });
+                }
+            } catch (error) {
+                console.error('Error sending data to sheet', error);
+
+            }
+        }
+
+        async function sendMessages(msg) {
+            try {
+                await liff.sendMessages(msg);
+                Swal.fire({
+                    position: "top-end",
+                    icon: "success",
+                    title: "ส่งเข้าแชทเรียบร้อย",
+                    showConfirmButton: false,
+                    timer: 1500,
+                }).then(() => {
+                    getData();
+                });
+            } catch (error) {
+                console.error('Error sending messages', error);
+            }
+        }
+
+        function formatDate(dateString) {
+
+            const [day, month, year] = dateString.split('/');
+
+
+            const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+
+
+            return date.toLocaleDateString('th-TH', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            main();
+
+        });
+
+    </script>
+
+
+</body>
+
+</html>
