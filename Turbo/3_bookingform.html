@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="Booking">
+    <meta property="og:type" content="website">
+    <meta property="og:description" content="นัดหมายจองคิว">
+    <meta property="og:url" content="https://lin.ee/5E01k0l">
+    <meta property="og:site_name" content="HofKrisda">
+    <meta property="og:image" content="https://image.makewebcdn.com/makeweb/0/pMrtkmxgt/APNG_images/apng_09.png?v=202405291424">
+    <title>Turbo - จัดการนัดหมาย</title>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://bit.ly/fontiton5" type="text/css" charset="utf-8" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#b49a67',
+                        secondary: '#ceb3ab',
+                        dark: '#121212',
+                        darkgray: '#1e1e1e',
+                        lightgray: '#2d2d2d'
+                    },
+                    fontFamily: {
+                        prompt: ['line_seed_sans_th']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'line_seed_sans_th';
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #b49a67, #ceb3ab);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .gradient-border {
+            position: relative;
+            border-radius: 0.5rem;
+            background: #1e1e1e;
+        }
+
+        .gradient-border::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(90deg, #b49a67, #ceb3ab);
+            border-radius: 0.6rem;
+            z-index: -1;
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .animate-pulse-slow {
+            animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: #b49a67;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .appointment-card {
+            transition: all 0.3s ease;
+        }
+
+        .appointment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(147, 51, 234, 0.3);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: #E69D20; 
+        }
+
+        .status-confirmed {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .status-cancelled {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #F16868;
+        }
+
+        .status-completed {
+            background-color: rgba(79, 70, 229, 0.2);
+
+            color: #ffffff;
+        }
+
+        .modal {
+            transition: all 0.3s ease;
+        }
+
+        .modal-content {
+            transition: all 0.3s ease;
+        }
+
+        .modal.show .modal-overlay {
+            opacity: 1;
+        }
+
+        .modal.show .modal-content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .modal-overlay {
+            opacity: 0;
+        }
+
+        .modal-content {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+      
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ceb3ab;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b49a67;
+        }
+
+        .btn-cancel {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.6s ease;
+        }
+
+        .btn-cancel:hover:before {
+            left: 100%;
+        }
+
+        .btn-new {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-new:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.6s ease;
+        }
+
+        .btn-new:hover:before {
+            left: 100%;
+        }
+
+        .empty-state {
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            to {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-8 max-w-4xl">
+       
+        <div id="loading-screen" class="fixed inset-0 bg-dark flex items-center justify-center z-50">
+            <div class="text-center">
+                <div class="loading-spinner mx-auto mb-4"></div>
+                <h2 class="text-xl font-medium text-white">กำลังโหลดข้อมูล LINE...</h2>
+            </div>
+        </div>
+
+        
+        <header class="mb-8 slide-in" style="animation-delay: 0.1s;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold gradient-text">Turbo ประกันภัย</h1>
+                    <p class="text-gray-400">จัดการการนัดหมายของคุณ</p>
+                </div>
+                <div class="relative w-14 h-14 animate-float">
+
+                   <img class="w-full h-full dark:border-gray-800 mx-auto my-4" src="https://image.makewebcdn.com/makeweb/0/pMrtkmxgt/APNG_images/apng_09.png?v=202405291424" alt="Logo">
+                </div>
+            </div>
+        </header>
+
+        <main>
+            
+            <div class="gradient-border p-6 mb-6 slide-in" style="animation-delay: 0.2s;">
+                <div class="flex items-center">
+                    <div id="user-avatar" class="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 id="user-name" class="text-xl font-semibold">กำลังโหลดข้อมูล...</h2>
+                        <p id="user-info" class="text-gray-200">ยินดีต้อนรับ</p>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="mb-6 slide-in" style="animation-delay: 0.3s;">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold">การนัดหมายของคุณ</h2>
+                    <button id="btn-new-appointment" class="btn-new bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all duration-300 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        นัดหมายใหม่
+                    </button>
+                </div>
+
+                
+                <div id="appointments-container">
+                    
+                    <div id="appointments-loading" class="py-8 text-center">
+                        <div class="loading-spinner mx-auto mb-4"></div>
+                        <p class="text-gray-400">กำลังโหลดข้อมูลการนัดหมาย...</p>
+                    </div>
+
+                   
+                    <div id="appointments-empty" class="hidden py-12 text-center">
+                        <div class="w-24 h-24 mx-auto mb-4 empty-state">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="url(#empty-gradient)" class="w-full h-full">
+                                <defs>
+                                    <linearGradient id="empty-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#b49a67" />
+                                        <stop offset="100%" stop-color="#ceb3ab" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M12.75 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM7.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM8.25 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM9.75 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM10.5 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM12.75 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM14.25 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" />
+                                <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 0 1 7.5 3v1.5h9V3A.75.75 0 0 1 18 3v1.5h.75a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3H6V3a.75.75 0 0 1 .75-.75Zm13.5 9a1.5 1.5 0 0 0-1.5-1.5H5.25a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5Z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-medium mb-2 gradient-text">ไม่พบการนัดหมาย</h3>
+                        <p class="text-gray-400 mb-6">คุณยังไม่มีการนัดหมายในขณะนี้</p>
+                        <button id="btn-create-first" class="bg-gradient-to-r from-primary to-secondary text-white px-6 py-2 rounded-lg hover:opacity-90 transition-all duration-300">
+                            สร้างการนัดหมายแรกของคุณ
+                        </button>
+                    </div>
+
+                    
+                    <div id="appointments-list" class="hidden space-y-4">
+                        <!-- รายการดึงข้อมูล -->
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="mb-6 slide-in" style="animation-delay: 0.4s;">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold">ประวัติการนัดหมาย</h2>
+                </div>
+
+               
+                <div id="history-container">
+                   
+                    <div id="history-loading" class="py-8 text-center">
+                        <div class="loading-spinner mx-auto mb-4"></div>
+                        <p class="text-gray-400">กำลังโหลดประวัติการนัดหมาย...</p>
+                    </div>
+
+                    
+                    <div id="history-empty" class="hidden py-8 text-center">
+                        <p class="text-gray-400">ไม่พบประวัติการนัดหมาย</p>
+                    </div>
+
+                    
+                    <div id="history-list" class="hidden space-y-4">
+                        <!-- รายการดึงข้อมูลประวัติ -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        
+        <footer class="mt-12 text-center text-gray-500 text-sm slide-in" style="animation-delay: 0.5s;">
+            <p>Turbo ประกันภัย</p>
+          
+        </footer>
+
+        
+        <div id="cancel-modal" class="modal fixed inset-0 z-50 hidden flex justify-center items-center">
+    <div class="modal-overlay absolute inset-0 bg-black bg-opacity-70"></div>
+    <div class="modal-content relative z-10 w-full max-w-md">
+        <div class="gradient-border p-6 bg-gray-800 rounded-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold">ยืนยันการยกเลิกนัดหมาย</h3>
+                <button id="close-modal" class="text-gray-400 hover:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="mb-6">
+                <p class="text-gray-300 mb-4">คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการนัดหมายนี้?</p>
+                <div class="bg-darkgray p-4 rounded-lg mb-4">
+                    <h4 class="text-gray-400 text-sm mb-1">บริการ</h4>
+                    <p id="modal-service" class="font-medium">-</p>
+                </div>
+                <div class="bg-darkgray p-4 rounded-lg mb-4">
+                    <h4 class="text-gray-400 text-sm mb-1">วันที่และเวลา</h4>
+                    <p id="modal-datetime" class="font-medium">-</p>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button id="cancel-no" class="border border-gray-600 text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-800 transition-all duration-300">
+                    ไม่ ฉันเปลี่ยนใจ
+                </button>
+                <button id="cancel-yes" class="btn-cancel bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-300">
+                    ใช่ ยกเลิกนัดหมาย
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            initializeLIFF();
+
+            const appScript = "https://script.google.com/macros/s/AKfycbyMrUtnF207i1YmAFSh2VEZJ5zHC1xkF86KtNJPFRzcszeea7nY6TRg80pnXeRSHxhg7g/exec"
+            const botBasicId = "@362sclhh"
+            let userId = '';
+            let userName = '';
+            let userPicture = '';
+            let currentAppointmentId = '';
+                       
+            const loadingScreen = document.getElementById('loading-screen');
+            const userNameElement = document.getElementById('user-name');
+            const userInfoElement = document.getElementById('user-info');
+            const userAvatarElement = document.getElementById('user-avatar');
+            
+            const appointmentsLoading = document.getElementById('appointments-loading');
+            const appointmentsEmpty = document.getElementById('appointments-empty');
+            const appointmentsList = document.getElementById('appointments-list');
+            
+            const historyLoading = document.getElementById('history-loading');
+            const historyEmpty = document.getElementById('history-empty');
+            const historyList = document.getElementById('history-list');
+            
+            const cancelModal = document.getElementById('cancel-modal');
+            const modalService = document.getElementById('modal-service');
+            const modalDatetime = document.getElementById('modal-datetime');
+
+            
+            document.getElementById('btn-new-appointment').addEventListener('click', function() {
+                
+                window.location.href = '/HOF_Project/reserve_Q/turbo/3_bookingform.html';
+            });
+
+            document.getElementById('btn-create-first').addEventListener('click', function() {
+                
+                window.location.href = '/HOF_Project/reserve_Q/turbo/3_bookingform.html';
+            });
+
+            document.getElementById('close-modal').addEventListener('click', function() {
+                closeModal();
+            });
+
+            document.getElementById('cancel-no').addEventListener('click', function() {
+                closeModal();
+            });
+
+            document.getElementById('cancel-yes').addEventListener('click', function() {
+                cancelAppointment(currentAppointmentId);
+            });
+
+           
+            function initializeLIFF() {
+                liff.init({
+                    liffId: '2007801752-gKlWmWmd',withLoginOnExternalBrowser: true
+                }).then(() => {
+                  
+                  liff.getFriendship().then((data) => {
+            if (!data.friendFlag) {
+              Swal.fire('เดี๋ยวก่อน!', 'คุณยังไม่ได้เป็นเพื่อนกับเรา', 'error').then(() => {
+                window.location = 'https://line.me/R/ti/p/' + botBasicId
+              })
+            }
+          });
+                    if (liff.isLoggedIn()) {
+                        
+                        liff.getProfile().then(profile => {
+                            userId = profile.userId;
+                            userName = profile.displayName;
+                            userPicture = profile.pictureUrl;
+                            
+                            
+                            updateUserInfo();
+                            
+                           
+                            loadAppointments();
+                        }).catch(err => {
+                            console.error('Error getting profile:', err);
+                            hideLoading();
+                        });
+                    } else {
+                        
+                        liff.login({
+                        redirectUri: location.href
+                    });
+                    }
+                }).catch(err => {
+                    console.error('LIFF initialization failed:', err);
+                    hideLoading();
+                });
+            }
+
+           
+            function updateUserInfo() {
+                userNameElement.textContent = userName;
+                userInfoElement.textContent = 'ยินดีต้อนรับ';
+                
+                
+                if (userPicture) {
+                    userAvatarElement.innerHTML = `<img src="${userPicture}" alt="${userName}" class="w-16 h-16 rounded-full object-cover">`;
+                }
+            }
+
+            
+            function loadAppointments() {
+               
+                appointmentsLoading.classList.remove('hidden');
+                historyLoading.classList.remove('hidden');
+                
+                
+                const data = new URLSearchParams();
+                data.append('action', 'getUserAppointments');
+                data.append('userId', userId);
+                
+                
+                fetch(appScript, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: data
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+                    
+                    if (data.success) {
+                       
+                        processAppointments(data.appointments);
+                    } else {
+                        showError('ไม่สามารถโหลดข้อมูลการนัดหมายได้');
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    console.error('Error:', error);
+                    showError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+                });
+            }
+
+           
+            function processAppointments(appointments) {
+                
+                appointmentsLoading.classList.add('hidden');
+                historyLoading.classList.add('hidden');
+                
+                
+                const activeAppointments = appointments.filter(app => 
+                    app.status === 'Pending' || app.status === 'Confirmed'
+                );
+                
+                const historyAppointments = appointments.filter(app => 
+                    app.status === 'Completed' || app.status === 'Cancelled'
+                );
+                
+               
+                if (activeAppointments.length === 0) {
+                    appointmentsEmpty.classList.remove('hidden');
+                } else {
+                    appointmentsList.classList.remove('hidden');
+                    renderAppointments(activeAppointments, appointmentsList);
+                }
+                
+                
+                if (historyAppointments.length === 0) {
+                    historyEmpty.classList.remove('hidden');
+                } else {
+                    historyList.classList.remove('hidden');
+                    renderAppointments(historyAppointments, historyList);
+                }
+            }
+
+          
+            function renderAppointments(appointments, container) {
+                
+                container.innerHTML = '';
+                
+                
+             
+                const statusInfo = {
+                    'Pending': {
+                        text: 'รอยืนยัน',
+                        class: 'status-pending'
+                    },
+                    'Confirmed': {
+                        text: 'ยืนยันแล้ว',
+                        class: 'status-confirmed'
+                    },
+                    'Completed': {
+                        text: 'เสร็จสิ้น',
+                        class: 'status-completed'
+                    },
+                    'Cancelled': {
+                        text: 'ยกเลิกแล้ว',
+                        class: 'status-cancelled'
+                    }
+                };
+                
+                
+                appointments.forEach(appointment => {
+                   
+                   const formattedDate = formatDate(appointment.date);
+                  const formattedTime =  `${String(appointment.time)} น.`;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'appointment-card gradient-border p-4';
+                    
+                    
+                    let cardContent = `
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="font-medium">${ appointment.productName}</h3>
+                            <span class="status-badge ${statusInfo[appointment.status].class}">${statusInfo[appointment.status].text}</span>
+                        </div>
+                        <div class="flex items-center mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span class="text-gray-300">${formattedDate}</span>
+                        </div>
+                        <div class="flex items-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="text-gray-300">${formattedTime}</span>
+                        </div>
+                    `;
+                    
+                    
+                    if (appointment.status === 'Pending' || appointment.status === 'Confirmed') {
+                        cardContent += `
+                            <div class="flex justify-end">
+                                <button class="btn-cancel-appointment btn-cancel bg-red-600 bg-opacity-20 text-red-400 px-4 py-1 rounded-lg hover:bg-opacity-30 transition-all duration-300" data-id="${appointment.id}" data-service="${appointment.productName}" data-datetime="${formattedDate} ${formattedTime}">
+                                    ยกเลิกนัดหมาย
+                                </button>
+                            </div>
+                        `;
+                    }
+                    
+                   
+                    card.innerHTML = cardContent;
+                    
+                   
+                    container.appendChild(card);
+                });
+                
+                
+                document.querySelectorAll('.btn-cancel-appointment').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const appointmentId = this.getAttribute('data-id');
+                        const service = this.getAttribute('data-service');
+                        const datetime = this.getAttribute('data-datetime');
+                        
+                        showCancelModal(appointmentId, service, datetime);
+                    });
+                });
+            }
+
+           
+            function showCancelModal(appointmentId, service, datetime) {
+                currentAppointmentId = appointmentId;
+                modalService.textContent = service;
+                modalDatetime.textContent = datetime;
+                
+                cancelModal.classList.remove('hidden');
+                cancelModal.classList.add('show');
+            }
+
+           
+            function closeModal() {
+                cancelModal.classList.remove('show');
+                setTimeout(() => {
+                    cancelModal.classList.add('hidden');
+                }, 300);
+            }
+
+           
+            function cancelAppointment(appointmentId) {
+                
+                loadingScreen.classList.remove('hidden');
+                
+               
+                closeModal();
+                
+                
+                const data = new URLSearchParams();
+                data.append('action', 'cancelAppointment');
+                data.append('appointmentId', appointmentId);
+                data.append('userId', userId);
+                
+                
+                fetch(appScript, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: data
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+                    
+                    if (data.success) {
+                         const flexMessage = JSON.parse(data.body);
+                       sendText([flexMessage]);
+                        resetAppointmentsUI();
+                        loadAppointments();
+                    } else {
+                        showError('ไม่สามารถยกเลิกการนัดหมายได้');
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    console.error('Error:', error);
+                    showError('เกิดข้อผิดพลาดในการยกเลิกการนัดหมาย');
+                });
+            }
+
+            
+            function resetAppointmentsUI() {
+                appointmentsLoading.classList.remove('hidden');
+                appointmentsEmpty.classList.add('hidden');
+                appointmentsList.classList.add('hidden');
+                appointmentsList.innerHTML = '';
+                
+                historyLoading.classList.remove('hidden');
+                historyEmpty.classList.add('hidden');
+                historyList.classList.add('hidden');
+                historyList.innerHTML = '';
+            }
+
+            
+            function hideLoading() {
+                loadingScreen.classList.add('hidden');
+            }
+
+            
+            function showError(message) {
+                alert(message);
+            }
+        });
+      
+      function formatDate(dateString) {
+            const date = new Date(dateString);
+
+            return date.toLocaleString('th-TH', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+                
+            });
+        }
+      
+      function sendText(text) {
+            if (!liff.isInClient()) {
+                shareTargetPicker(text);
+            } else {
+                sendflex(text);
+            }
+        }
+        function sendflex(text) {
+            liff.sendMessages(text).then(function () {
+               const Toast = Swal.mixin({
+              toast: true,
+              position: "top-end",
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+              }
+            });
+                 Toast.fire({
+                            icon: "success",
+                            title: "ส่งเข้าแชทเรียบร้อย"
+                          });
+
+
+            })
+        }
+        function shareTargetPicker(text) {
+            liff.shareTargetPicker(text).then(function (res) {
+                if (res) {
+                    const Toast = Swal.mixin({
+              toast: true,
+              position: "top-end",
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+              }
+            });
+                   Toast.fire({
+                            icon: "success",
+                            title: "ส่งเข้าแชทเรียบร้อย"
+                          });
+
+                } else {
+
+                    console.log("TargetPicker was closed!");
+                }
+            }).catch(function (error) {
+                window.alert("Failed to send message " + error);
+            });
+        }
+    </script>
+</body>
+</html>
