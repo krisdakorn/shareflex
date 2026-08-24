@@ -10,7 +10,7 @@
         rel="stylesheet" />
     <link href="https://image.makewebeasy.net/makeweb/0/pMrtkmxgt/APNG_images/bot_04.png?v=202012190947"
         rel="shortcut icon" />
-    <title>แบบฟอร์มลงทะเบียน 2 / Feedback</title>
+    <title>แบบฟอร์มลงทะเบียน 2/ Feedback</title>
     <style>
         * {
             margin: 0;
@@ -639,6 +639,10 @@
             const phoneFormatted = payload.phone.length === 10
                 ? payload.phone.slice(0, 3) + "-" + payload.phone.slice(3, 6) + "-" + payload.phone.slice(6)
                 : payload.phone;
+            const fullName = payload.prefix + " " + payload.firstName + " " + payload.lastName;
+            const now = new Date();
+            const timestamp = now.toLocaleDateString("th-TH", { day: "2-digit", month: "2-digit", year: "numeric" })
+                + " " + now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
 
             try {
                 // 1. ส่งข้อมูลไป Google Apps Script (บันทึก Sheet + Broadcast admin)
@@ -646,20 +650,115 @@
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
-                    mode: "no-cors" // Google Apps Script requires no-cors
+                    mode: "no-cors"
                 });
 
-                // 2. ส่งข้อความสรุปเข้าแชท ผ่าน liff.sendMessages()
-                //    ข้อความ "ลงทะเบียนสำเร็จ" จะ trigger keyword auto-reply
-                //    → บอทตอบกลับด้วย Flex Message ผ่าน replyToken (ฟรี ไม่เสียโควต้า!)
+                // 2. ส่ง Flex Message สรุปข้อมูล (ฝั่ง user) + text trigger keyword
+                //    - Flex Message: การ์ดสรุปข้อมูลสวยๆ (ส่งจากฝั่ง user ไม่เสียโควต้า)
+                //    - Text "ลงทะเบียนสำเร็จ": trigger keyword → บอท reply Flex ผ่าน replyToken (ฟรี!)
                 if (typeof liff !== "undefined" && liff.isInClient && liff.isInClient()) {
                     await liff.sendMessages([
                         {
+                            type: "flex",
+                            altText: "📋 สรุปข้อมูลลงทะเบียน: " + fullName,
+                            contents: {
+                                type: "bubble",
+                                size: "mega",
+                                header: {
+                                    type: "box",
+                                    layout: "vertical",
+                                    contents: [
+                                        {
+                                            type: "text",
+                                            text: "📋 สรุปข้อมูลลงทะเบียน",
+                                            weight: "bold",
+                                            size: "lg",
+                                            color: "#ffffff",
+                                            align: "center"
+                                        }
+                                    ],
+                                    backgroundColor: "#1a365d",
+                                    paddingAll: "lg"
+                                },
+                                body: {
+                                    type: "box",
+                                    layout: "vertical",
+                                    contents: [
+                                        {
+                                            type: "box",
+                                            layout: "horizontal",
+                                            contents: [
+                                                { type: "text", text: "👤", size: "sm", flex: 0 },
+                                                {
+                                                    type: "box", layout: "vertical", paddingStart: "md", flex: 1,
+                                                    contents: [
+                                                        { type: "text", text: "ชื่อ-นามสกุล", size: "xs", color: "#999999" },
+                                                        { type: "text", text: fullName, size: "sm", color: "#333333", weight: "bold", wrap: true }
+                                                    ]
+                                                }
+                                            ],
+                                            alignItems: "flex-start"
+                                        },
+                                        { type: "separator", margin: "md" },
+                                        {
+                                            type: "box",
+                                            layout: "horizontal",
+                                            margin: "md",
+                                            contents: [
+                                                { type: "text", text: "📞", size: "sm", flex: 0 },
+                                                {
+                                                    type: "box", layout: "vertical", paddingStart: "md", flex: 1,
+                                                    contents: [
+                                                        { type: "text", text: "เบอร์โทรศัพท์", size: "xs", color: "#999999" },
+                                                        { type: "text", text: phoneFormatted, size: "sm", color: "#333333", weight: "bold" }
+                                                    ]
+                                                }
+                                            ],
+                                            alignItems: "flex-start"
+                                        },
+                                        { type: "separator", margin: "md" },
+                                        {
+                                            type: "box",
+                                            layout: "horizontal",
+                                            margin: "md",
+                                            contents: [
+                                                { type: "text", text: "💬", size: "sm", flex: 0 },
+                                                {
+                                                    type: "box", layout: "vertical", paddingStart: "md", flex: 1,
+                                                    contents: [
+                                                        { type: "text", text: "ข้อความ Feedback", size: "xs", color: "#999999" },
+                                                        { type: "text", text: payload.feedback, size: "sm", color: "#333333", weight: "bold", wrap: true }
+                                                    ]
+                                                }
+                                            ],
+                                            alignItems: "flex-start"
+                                        },
+                                        { type: "separator", margin: "md" },
+                                        {
+                                            type: "box",
+                                            layout: "horizontal",
+                                            margin: "md",
+                                            contents: [
+                                                { type: "text", text: "🕐", size: "sm", flex: 0 },
+                                                {
+                                                    type: "box", layout: "vertical", paddingStart: "md", flex: 1,
+                                                    contents: [
+                                                        { type: "text", text: "เวลาลงทะเบียน", size: "xs", color: "#999999" },
+                                                        { type: "text", text: timestamp, size: "sm", color: "#333333", weight: "bold" }
+                                                    ]
+                                                }
+                                            ],
+                                            alignItems: "flex-start"
+                                        }
+                                    ],
+                                    paddingAll: "lg",
+                                    spacing: "sm"
+                                }
+                            }
+                        },
+                        {
                             type: "text",
                             text: "ลงทะเบียนสำเร็จ"
-                                + "\n👤 " + payload.prefix + " " + payload.firstName + " " + payload.lastName
-                                + "\n📞 " + phoneFormatted
-                                + "\n💬 " + payload.feedback
                         }
                     ]);
                 }
