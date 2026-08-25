@@ -905,23 +905,29 @@
                 + " " + now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
 
             try {
-                // ส่งข้อมูลทั้งหมดไป GAS ใน 1 request เดียว (data + image)
-                // ใช้ text/plain (CORS-safelisted → header ไม่ถูก strip โดย no-cors)
-                await fetch(GAS_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=UTF-8" },
-                    body: JSON.stringify(payload),
-                    mode: "no-cors"
-                });
+                // แสดง "กำลังบันทึก..." ทันทีหลังกดส่ง (ไม่ให้ user รู้สึกว่ารอนาน)
+                showProcessing();
 
-                // ⏳ รอให้ body ถูกส่งเสร็จ (no-cors resolve ทันทีแต่ body ขนาดใหญ่อาจยังอัพโหลดอยู่)
-                const waitTime = selectedImageBase64 ? 8000 : 1000;
-                await new Promise(resolve => setTimeout(resolve, waitTime));
-                console.log("✅ ส่งข้อมูลไป GAS แล้ว");
+                // ส่งข้อมูลทั้งหมดไป GAS (await เพื่อรับ imageUrl กลับมาแสดงใน Flex)
+                let imageUrl = "";
+                try {
+                    const response = await fetch(GAS_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=UTF-8" },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    imageUrl = (result && result.imageUrl) || "";
+                    console.log("✅ GAS response:", result);
+                } catch (fetchErr) {
+                    // CORS อาจ block response แต่ข้อมูลถูกส่งไปแล้ว
+                    console.warn("GAS fetch catch (data was sent):", fetchErr);
+                }
 
-                // 2. สร้าง Flex Message สรุปข้อมูล (ฝั่ง user)
-                //    หมายเหตุ: no-cors อ่าน response ไม่ได้ จึงไม่มี imageUrl จาก GAS
-                //    รูปภาพจะถูกเก็บใน Google Drive + แสดงใน Telegram เรียบร้อย
+                // อัพเดตเป็น "สำเร็จ!"
+                updateProcessingToSuccess();
+
+                // สร้าง Flex Message สรุปข้อมูล (ฝั่ง user)
                 const flexBodyContents = [
                     {
                         type: "box",
@@ -991,28 +997,41 @@
                     }
                 ];
 
-                // ถ้ามีรูปภาพ → แสดงข้อความว่าแนบรูปแล้วใน Flex (รูปจริงอยู่ใน Drive + Telegram)
+                // ถ้ามีรูปภาพ → แสดงรูปจริงใน Flex (ถ้าได้ URL) หรือแสดงข้อความ
                 if (selectedImageBase64) {
                     flexBodyContents.push({ type: "separator", margin: "md" });
-                    flexBodyContents.push({
-                        type: "box",
-                        layout: "horizontal",
-                        margin: "md",
-                        contents: [
-                            { type: "text", text: "📷", size: "sm", flex: 0 },
-                            {
-                                type: "box", layout: "vertical", paddingStart: "md", flex: 1,
-                                contents: [
-                                    { type: "text", text: "รูปภาพประกอบ", size: "xs", color: "#999999" },
-                                    { type: "text", text: "✅ แนบรูปภาพเรียบร้อยแล้ว", size: "sm", color: "#276749", weight: "bold" }
-                                ]
-                            }
-                        ],
-                        alignItems: "flex-start"
-                    });
+                    if (imageUrl) {
+                        // ✅ ได้ URL รูปจาก GAS → แสดงรูปจริงใน Flex!
+                        flexBodyContents.push({
+                            type: "image",
+                            url: imageUrl,
+                            size: "full",
+                            aspectRatio: "1:1",
+                            aspectMode: "cover",
+                            margin: "md"
+                        });
+                    } else {
+                        // ไม่ได้ URL → แสดงข้อความแทน
+                        flexBodyContents.push({
+                            type: "box",
+                            layout: "horizontal",
+                            margin: "md",
+                            contents: [
+                                { type: "text", text: "📷", size: "sm", flex: 0 },
+                                {
+                                    type: "box", layout: "vertical", paddingStart: "md", flex: 1,
+                                    contents: [
+                                        { type: "text", text: "รูปภาพประกอบ", size: "xs", color: "#999999" },
+                                        { type: "text", text: "✅ แนบรูปภาพเรียบร้อยแล้ว", size: "sm", color: "#276749", weight: "bold" }
+                                    ]
+                                }
+                            ],
+                            alignItems: "flex-start"
+                        });
+                    }
                 }
 
-                // 3. ส่ง LIFF Messages (Flex + text trigger keyword)
+                // ส่ง LIFF Messages (Flex + text trigger keyword)
                 if (typeof liff !== "undefined" && liff.isInClient && liff.isInClient()) {
                     await liff.sendMessages([
                         {
@@ -1053,30 +1072,34 @@
                     ]);
                 }
 
-                // 4. แสดง Success Animation → ปิด LIFF
-                showSuccess();
+                // ปิด LIFF หลัง 3 วินาที
+                setTimeout(() => {
+                    if (typeof liff !== "undefined" && liff.isInClient && liff.isInClient()) {
+                        liff.closeWindow();
+                    }
+                }, 3000);
 
             } catch (error) {
                 console.error("Submit error:", error);
                 alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
                 btn.classList.remove("loading");
+
                 btn.disabled = false;
             }
         }
 
-        // ---- Success Animation ----
-        function showSuccess() {
+        // ---- Processing & Success Animation ----
+        function showProcessing() {
             const overlay = document.getElementById("successOverlay");
+            const msgEl = overlay.querySelector("p");
+            msgEl.textContent = "กำลังบันทึกข้อมูล... กรุณารอสักครู่";
             overlay.classList.add("show");
+        }
 
-            // Close LIFF after 10 seconds (รอให้รูปภาพส่งเสร็จก่อน)
-            setTimeout(() => {
-                if (typeof liff !== "undefined" && liff.isInClient && liff.isInClient()) {
-                    liff.closeWindow();
-                } else {
-                    overlay.querySelector("p").textContent = "ลงทะเบียนสำเร็จ! คุณสามารถปิดหน้านี้ได้";
-                }
-            }, 10000);
+        function updateProcessingToSuccess() {
+            const overlay = document.getElementById("successOverlay");
+            const msgEl = overlay.querySelector("p");
+            msgEl.textContent = "ลงทะเบียนสำเร็จ! กำลังปิดหน้าต่าง...";
         }
 
         // ---- Clear invalid on input ----
