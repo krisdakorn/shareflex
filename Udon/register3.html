@@ -898,15 +898,37 @@
                 + " " + now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
 
             try {
-                // 1. ส่งข้อมูลไป Google Apps Script (บันทึก Sheet + อัพโหลดรูป Drive + Telegram)
-                //    ใช้ no-cors (การันตีส่งข้อมูลถึง GAS ทุกครั้ง)
+                // 1. ส่งข้อมูลหลักไป GAS (ไม่รวมรูปภาพ → payload เล็ก → ส่งเร็ว → การันตีถึง)
+                const mainPayload = { ...payload };
+                delete mainPayload.imageBase64; // แยกรูปออกไป ส่งทีหลัง
+
                 await fetch(GAS_URL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
+                    body: JSON.stringify(mainPayload),
                     mode: "no-cors"
                 });
-                console.log("✅ ส่งข้อมูลไป GAS แล้ว (no-cors)");
+                console.log("✅ ส่งข้อมูลหลักไป GAS แล้ว");
+
+                // 2. ถ้ามีรูปภาพ → ส่งแยกอีก request (payload ใหญ่ แต่ไม่กระทบข้อมูลหลัก)
+                if (selectedImageBase64) {
+                    try {
+                        await fetch(GAS_URL, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                action: "uploadImage",
+                                imageBase64: selectedImageBase64,
+                                lineUserId: payload.lineUserId,
+                                firstName: payload.firstName
+                            }),
+                            mode: "no-cors"
+                        });
+                        console.log("✅ ส่งรูปภาพไป GAS แล้ว");
+                    } catch (imgErr) {
+                        console.warn("ส่งรูปภาพไม่สำเร็จ:", imgErr);
+                    }
+                }
 
                 // 2. สร้าง Flex Message สรุปข้อมูล (ฝั่ง user)
                 //    หมายเหตุ: no-cors อ่าน response ไม่ได้ จึงไม่มี imageUrl จาก GAS
