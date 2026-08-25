@@ -345,8 +345,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         .image-preview-container img {
@@ -898,44 +905,20 @@
                 + " " + now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
 
             try {
-                // 1. ส่งข้อมูลหลักไป GAS (ไม่รวมรูปภาพ → payload เล็ก → ส่งเร็ว → การันตีถึง)
-                const mainPayload = { ...payload };
-                delete mainPayload.imageBase64; // แยกรูปออกไป ส่งทีหลัง
-
-                await fetch(GAS_URL, {
+                // ส่งข้อมูลทั้งหมดไป GAS ใน 1 request เดียว (data + image)
+                // ใช้ text/plain (CORS-safelisted → header ไม่ถูก strip โดย no-cors)
+                // ไม่ใช้ await → ส่ง request แล้วแสดง success ทันที (GAS ประมวลผลในพื้นหลัง)
+                fetch(GAS_URL, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(mainPayload),
+                    headers: { "Content-Type": "text/plain;charset=UTF-8" },
+                    body: JSON.stringify(payload),
                     mode: "no-cors"
-                });
-                console.log("✅ ส่งข้อมูลหลักไป GAS แล้ว");
+                }).then(() => console.log("✅ GAS request completed"))
+                  .catch(err => console.warn("GAS request:", err));
 
-                // 2. ถ้ามีรูปภาพ → ส่งแยกอีก request
-                if (selectedImageBase64) {
-                    const imagePayload = JSON.stringify({
-                        action: "uploadImage",
-                        imageBase64: selectedImageBase64,
-                        lineUserId: payload.lineUserId,
-                        firstName: payload.firstName
-                    });
-                    
-                    // DEBUG: แสดงขนาด payload
-                    const payloadSizeKB = (imagePayload.length / 1024).toFixed(1);
-                    console.log("📷 Image payload size:", payloadSizeKB, "KB");
-
-                    try {
-                        await fetch(GAS_URL, {
-                            method: "POST",
-                            body: imagePayload
-                        });
-                        console.log("✅ ส่งรูปภาพไป GAS สำเร็จ");
-                        alert("✅ อัพโหลดรูปสำเร็จ! (" + payloadSizeKB + " KB)");
-                    } catch (imgErr) {
-                        // CORS อาจ block response แต่ request ถูกส่งไปแล้ว
-                        console.warn("Image upload catch:", imgErr);
-                        alert("📷 รูปถูกส่งแล้ว (" + payloadSizeKB + " KB)\nCatch: " + imgErr.message);
-                    }
-                }
+                // แสดง success ทันที (ไม่ต้องรอ GAS ประมวลผลเสร็จ)
+                showSuccess();
+                console.log("✅ ส่งข้อมูลไป GAS แล้ว (processing in background)");
 
                 // 2. สร้าง Flex Message สรุปข้อมูล (ฝั่ง user)
                 //    หมายเหตุ: no-cors อ่าน response ไม่ได้ จึงไม่มี imageUrl จาก GAS
@@ -1071,8 +1054,7 @@
                     ]);
                 }
 
-                // 4. แสดง Success Animation → ปิด LIFF
-                showSuccess();
+                // (success ถูกแสดงไปแล้วด้านบน)
 
             } catch (error) {
                 console.error("Submit error:", error);
@@ -1085,16 +1067,25 @@
         // ---- Success Animation ----
         function showSuccess() {
             const overlay = document.getElementById("successOverlay");
+            const msgEl = overlay.querySelector("p");
+            
+            // แสดง "กำลังบันทึก..." ทันที
+            msgEl.textContent = "กำลังบันทึกข้อมูล... กรุณารอสักครู่";
             overlay.classList.add("show");
 
-            // Close LIFF after 3 seconds
+            // 2 วิ → เปลี่ยนเป็น "สำเร็จ!"
+            setTimeout(() => {
+                msgEl.textContent = "ลงทะเบียนสำเร็จ! กำลังปิดหน้าต่าง...";
+            }, 2000);
+
+            // 12 วิ → ปิด LIFF (ให้เวลา GAS อัพโหลดรูป + Telegram ในพื้นหลัง)
             setTimeout(() => {
                 if (typeof liff !== "undefined" && liff.isInClient && liff.isInClient()) {
                     liff.closeWindow();
                 } else {
-                    overlay.querySelector("p").textContent = "ลงทะเบียนสำเร็จ! คุณสามารถปิดหน้านี้ได้";
+                    msgEl.textContent = "ลงทะเบียนสำเร็จ! คุณสามารถปิดหน้านี้ได้";
                 }
-            }, 3000);
+            }, 12000);
         }
 
         // ---- Clear invalid on input ----
