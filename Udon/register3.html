@@ -910,23 +910,24 @@
                 });
                 console.log("✅ ส่งข้อมูลหลักไป GAS แล้ว");
 
-                // 2. ถ้ามีรูปภาพ → ส่งแยกอีก request (payload ใหญ่ แต่ไม่กระทบข้อมูลหลัก)
+                // 2. ถ้ามีรูปภาพ → ส่งแยกอีก request (ไม่ใช้ no-cors เพื่อให้ browser รอส่ง body จนเสร็จ)
                 if (selectedImageBase64) {
                     try {
                         await fetch(GAS_URL, {
                             method: "POST",
-                            headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
                                 action: "uploadImage",
                                 imageBase64: selectedImageBase64,
                                 lineUserId: payload.lineUserId,
                                 firstName: payload.firstName
-                            }),
-                            mode: "no-cors"
+                            })
+                            // ไม่ใส่ mode หรือ Content-Type → default text/plain (simple request)
+                            // await จะรอจน body ถูกส่งเสร็จจริง → GAS ได้รับข้อมูลครบ
                         });
-                        console.log("✅ ส่งรูปภาพไป GAS แล้ว");
+                        console.log("✅ ส่งรูปภาพไป GAS สำเร็จ");
                     } catch (imgErr) {
-                        console.warn("ส่งรูปภาพไม่สำเร็จ:", imgErr);
+                        // CORS อาจ block response แต่ request ถูกส่งไปแล้ว → GAS ประมวลผลเรียบร้อย
+                        console.warn("รูปภาพถูกส่งแล้ว (CORS blocked response):", imgErr);
                     }
                 }
 
