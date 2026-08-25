@@ -910,24 +910,30 @@
                 });
                 console.log("✅ ส่งข้อมูลหลักไป GAS แล้ว");
 
-                // 2. ถ้ามีรูปภาพ → ส่งแยกอีก request (ไม่ใช้ no-cors เพื่อให้ browser รอส่ง body จนเสร็จ)
+                // 2. ถ้ามีรูปภาพ → ส่งแยกอีก request
                 if (selectedImageBase64) {
+                    const imagePayload = JSON.stringify({
+                        action: "uploadImage",
+                        imageBase64: selectedImageBase64,
+                        lineUserId: payload.lineUserId,
+                        firstName: payload.firstName
+                    });
+                    
+                    // DEBUG: แสดงขนาด payload
+                    const payloadSizeKB = (imagePayload.length / 1024).toFixed(1);
+                    console.log("📷 Image payload size:", payloadSizeKB, "KB");
+
                     try {
                         await fetch(GAS_URL, {
                             method: "POST",
-                            body: JSON.stringify({
-                                action: "uploadImage",
-                                imageBase64: selectedImageBase64,
-                                lineUserId: payload.lineUserId,
-                                firstName: payload.firstName
-                            })
-                            // ไม่ใส่ mode หรือ Content-Type → default text/plain (simple request)
-                            // await จะรอจน body ถูกส่งเสร็จจริง → GAS ได้รับข้อมูลครบ
+                            body: imagePayload
                         });
                         console.log("✅ ส่งรูปภาพไป GAS สำเร็จ");
+                        alert("✅ อัพโหลดรูปสำเร็จ! (" + payloadSizeKB + " KB)");
                     } catch (imgErr) {
-                        // CORS อาจ block response แต่ request ถูกส่งไปแล้ว → GAS ประมวลผลเรียบร้อย
-                        console.warn("รูปภาพถูกส่งแล้ว (CORS blocked response):", imgErr);
+                        // CORS อาจ block response แต่ request ถูกส่งไปแล้ว
+                        console.warn("Image upload catch:", imgErr);
+                        alert("📷 รูปถูกส่งแล้ว (" + payloadSizeKB + " KB)\nCatch: " + imgErr.message);
                     }
                 }
 
