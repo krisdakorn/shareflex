@@ -899,25 +899,21 @@
 
             try {
                 // 1. ส่งข้อมูลไป Google Apps Script (บันทึก Sheet + อัพโหลดรูป Drive + Telegram)
-                //    ใช้ text/plain เพื่อหลีกเลี่ยง CORS preflight และอ่าน response ได้
+                //    ส่งครั้งเดียว — ใช้ text/plain (simple request → ไม่ต้อง preflight)
+                //    ถ้า CORS block response → ข้อมูลยังถูกส่งและบันทึกปกติ แค่อ่าน response ไม่ได้
                 let gasResult = {};
                 try {
                     const response = await fetch(GAS_URL, {
                         method: "POST",
                         headers: { "Content-Type": "text/plain;charset=UTF-8" },
-                        body: JSON.stringify(payload),
-                        redirect: "follow"
+                        body: JSON.stringify(payload)
                     });
                     gasResult = await response.json();
+                    console.log("✅ GAS response:", gasResult);
                 } catch (fetchErr) {
-                    // Fallback: ถ้าอ่าน response ไม่ได้ (CORS) → ส่งแบบ no-cors
-                    console.warn("Fetch with response failed, fallback to no-cors:", fetchErr);
-                    await fetch(GAS_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload),
-                        mode: "no-cors"
-                    });
+                    // CORS อาจ block response แต่ข้อมูลถูกส่งไปแล้ว (simple request)
+                    // ไม่ต้องส่งซ้ำ!
+                    console.warn("ข้อมูลถูกส่งแล้ว แต่อ่าน response ไม่ได้ (CORS):", fetchErr);
                 }
 
                 // 2. สร้าง Flex Message สรุปข้อมูล (ฝั่ง user)
