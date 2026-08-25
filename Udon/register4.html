@@ -905,43 +905,19 @@
                 + " " + now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
 
             try {
-                // 1. ส่งข้อมูลหลักไป GAS (ไม่รวมรูปภาพ → payload เล็ก → ส่งเร็ว → การันตีถึง)
-                const mainPayload = { ...payload };
-                delete mainPayload.imageBase64; // แยกรูปออกไป ส่งทีหลัง
-
+                // ส่งข้อมูลทั้งหมดไป GAS ใน 1 request เดียว (data + image)
+                // ใช้ text/plain (CORS-safelisted → header ไม่ถูก strip โดย no-cors)
                 await fetch(GAS_URL, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(mainPayload),
+                    headers: { "Content-Type": "text/plain;charset=UTF-8" },
+                    body: JSON.stringify(payload),
                     mode: "no-cors"
                 });
-                console.log("✅ ส่งข้อมูลหลักไป GAS แล้ว");
 
-                // 2. ถ้ามีรูปภาพ → ส่งแยกอีก request
-                if (selectedImageBase64) {
-                    const imagePayload = JSON.stringify({
-                        action: "uploadImage",
-                        imageBase64: selectedImageBase64,
-                        lineUserId: payload.lineUserId,
-                        firstName: payload.firstName
-                    });
-
-                    const payloadSizeKB = (imagePayload.length / 1024).toFixed(1);
-                    console.log("📷 Image payload size:", payloadSizeKB, "KB");
-
-                    // ใช้ no-cors + text/plain (safelisted → header ไม่ถูก strip)
-                    // no-cors การันตีว่า request ถูกส่ง POST ไป GAS โดยไม่ redirect เปลี่ยนเป็น GET
-                    await fetch(GAS_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "text/plain;charset=UTF-8" },
-                        body: imagePayload,
-                        mode: "no-cors"
-                    });
-
-                    // ⏳ รอ 5 วินาที ให้ body ถูกส่งเสร็จสมบูรณ์ (no-cors resolve ทันทีแต่ body อาจยังส่งอยู่)
-                    await new Promise(resolve => setTimeout(resolve, 5000));
-                    console.log("✅ ส่งรูปภาพไป GAS แล้ว (" + payloadSizeKB + " KB)");
-                }
+                // ⏳ รอให้ body ถูกส่งเสร็จ (no-cors resolve ทันทีแต่ body ขนาดใหญ่อาจยังอัพโหลดอยู่)
+                const waitTime = selectedImageBase64 ? 8000 : 1000;
+                await new Promise(resolve => setTimeout(resolve, waitTime));
+                console.log("✅ ส่งข้อมูลไป GAS แล้ว");
 
                 // 2. สร้าง Flex Message สรุปข้อมูล (ฝั่ง user)
                 //    หมายเหตุ: no-cors อ่าน response ไม่ได้ จึงไม่มี imageUrl จาก GAS
